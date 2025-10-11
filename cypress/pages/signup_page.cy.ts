@@ -56,7 +56,7 @@ export class SignupPage{
 
     addPhoneInsideTheField( phone : string) {
         cy.get('#phoneNumber').type(phone, {scrollBehavior:false, force: true})
-        cy.wait(2000)
+        // Removed 2000ms wait - Cypress will auto-wait for next command
         cy.log(`the phonenumber is : ${phone}`)
     }
 
@@ -71,6 +71,7 @@ export class SignupPage{
 
     clickOnCountry() {
         cy.get('.text-left > :nth-child(4)').scrollIntoView().click({scrollBehavior:false, force: true});
+        cy.wait(500); // Small wait for dropdown to close and page to stabilize
     }
 
     // Click on nationality dropdown - with dynamic selector detection
@@ -84,7 +85,7 @@ export class SignupPage{
             
             if (nationalitySelector) {
                 cy.get(nationalitySelector).click({scrollBehavior:false});
-                cy.wait(500);
+                // Reduced wait from 500ms - let dropdown open naturally
             } else {
                 cy.log('⚠️ Nationality field not found, skipping nationality selection');
             }
@@ -186,7 +187,7 @@ export class SignupPage{
 
     navigateToLoginPage(ClientID: string) {
         cy.visit(''+ ClientID);
-        cy.wait(1000)
+        // Removed 1000ms wait - page will load automatically
         cy.get('.w-full').last().click();
     }
 
@@ -210,7 +211,7 @@ export class SignupPage{
         }
       
     clickOnSubmitButton() {
-        cy.wait(1000)
+        // Removed 1000ms wait - button will be clicked when ready
         cy.get('#submit-button').click()
     }
 
@@ -403,8 +404,8 @@ export class SignupPage{
     verifyEmailFromInbox(email: string, clientId: string) {
         cy.log('📧 Starting Gmail API email verification process');
         
-        // Wait for email to be sent
-        cy.wait(5000);
+        // Reduced wait from 5000ms to 3000ms - email usually arrives quickly
+        cy.wait(3000);
         cy.log(`📬 Fetching verification email from Gmail for: ${email}`);
         
         // Use Gmail API to get verification email
@@ -422,9 +423,9 @@ export class SignupPage{
                 cy.log('🌐 Clicking verification link...');
                 cy.visit(result.link);
                 
-                // Wait longer for verification to complete and page to redirect
+                // Reduced wait from 5000ms to 2000ms - verification usually completes quickly
                 cy.log('⏳ Waiting for email verification to complete...');
-                cy.wait(5000);
+                cy.wait(2000);
                 
                 // Check if verification was successful
                 cy.url().then(url => {
@@ -450,12 +451,12 @@ export class SignupPage{
                 
                 cy.log(`📍 Visiting landing page: ${landingUrl}`);
                 cy.visit(landingUrl);
-                cy.wait(2000);
+                // Reduced wait from 2000ms - page will load automatically
                 
-                // Click on login button
+                // Click on login button - wait for it to be visible instead of arbitrary wait
                 cy.log('🖱️ Clicking login button on landing page');
-                cy.get('#app > main > div > a').click({force: true});
-                cy.wait(2000);
+                cy.get('#app > main > div > a', { timeout: 10000 }).should('be.visible').click({force: true});
+                // Removed 2000ms wait after click
                 
                 // Verify we're on login page
                 cy.url().should('include', 'login');
@@ -489,12 +490,12 @@ export class SignupPage{
         
         cy.log(`🔙 Navigating to landing page: ${landingUrl}`);
         cy.visit(landingUrl);
-        cy.wait(2000);
+        // Removed 2000ms wait - page loads automatically
         
-        // Click login button
+        // Click login button - wait for visibility instead of arbitrary wait
         cy.log('🔘 Clicking Login button');
-        cy.get('#app > main > div > a').click({force: true});
-        cy.wait(2000);
+        cy.get('#app > main > div > a', { timeout: 10000 }).should('be.visible').click({force: true});
+        // Removed 2000ms wait after click
         
         cy.url().should('include', 'login');
         cy.log('✅ Successfully navigated to login page');
@@ -508,7 +509,7 @@ export class SignupPage{
 
     // Wait for OTP page to load
     waitForOTPPage() {
-        cy.wait(2000);
+        // Removed 2000ms wait - check URL directly with timeout
         cy.url().should('include', 'verify', { timeout: 10000 });
         cy.log('✅ OTP verification page loaded');
     }
@@ -525,19 +526,19 @@ export class SignupPage{
             if (sendOTPSelector) {
                 cy.get(sendOTPSelector).click({force: true, scrollBehavior: false});
                 cy.log('✅ Clicked Send OTP button');
-                cy.wait(1000);
+                // Removed 1000ms wait - next command will auto-wait
             } else {
                 // Fallback: try to find button with text containing 'send' or 'otp'
                 cy.contains('button', /send|otp|continue/i).first().click({force: true, scrollBehavior: false});
                 cy.log('✅ Clicked Send OTP button (fallback)');
-                cy.wait(1000);
+                // Removed 1000ms wait - next command will auto-wait
             }
         });
     }
 
     // Enter OTP code
     enterOTPCode(otp: string) {
-        cy.wait(1000); // Wait for OTP fields to be ready
+        cy.wait(500); // Small wait for OTP fields to appear
         
         // Try multiple possible selectors for OTP input fields
         cy.document().then((doc) => {
@@ -555,7 +556,7 @@ export class SignupPage{
                     }
                 });
                 cy.log(`✅ Entered OTP: ${otp}`);
-                cy.wait(500);
+                cy.wait(300); // Small wait after OTP entry
             } else {
                 // Check for other possible OTP input patterns
                 const otpInputs2 = doc.querySelectorAll('input[maxlength="1"]');
@@ -570,7 +571,7 @@ export class SignupPage{
                         }
                     });
                     cy.log(`✅ Entered OTP: ${otp}`);
-                    cy.wait(500);
+                    cy.wait(300); // Small wait after OTP entry
                 } else {
                     // Check for single OTP input field
                     const singleOTPSelector = doc.querySelector('#otp') ? '#otp' :
@@ -582,7 +583,7 @@ export class SignupPage{
                         cy.log(`Found single OTP input field: ${singleOTPSelector}`);
                         cy.get(singleOTPSelector).clear().type(otp, {force: true});
                         cy.log(`✅ Entered OTP: ${otp}`);
-                        cy.wait(500);
+                        cy.wait(300); // Small wait after OTP entry
                     } else {
                         cy.log('⚠️ OTP input field not found - trying to find any input field');
                         // Last resort: find any visible input field
@@ -609,8 +610,7 @@ export class SignupPage{
             cy.log(`Current URL: ${url}`);
         });
         
-        // Wait a bit for page to settle
-        cy.wait(2000);
+        // Removed 2000ms wait - check for button immediately
         
         cy.get('body').then(($body) => {
             // Try multiple selectors
@@ -633,12 +633,12 @@ export class SignupPage{
             }
         });
         
-        cy.wait(1000);
+        // Removed 1000ms wait - next command will auto-wait
     }
 
     // Click Save button on the next page
     clickSaveButton() {
-        cy.wait(2000); // Wait for page to load
+        // Removed 2000ms wait - check for dropdowns immediately
         
         // Close any dropdowns or overlays that might be open
         cy.document().then((doc) => {
@@ -647,7 +647,7 @@ export class SignupPage{
             if (openDropdown) {
                 cy.log('⚠️ Found open dropdown/overlay, clicking outside to close it');
                 cy.get('body').click(0, 0, {force: true}); // Click top-left corner
-                cy.wait(500);
+                // Removed 500ms wait - next command will auto-wait
             }
         });
         
@@ -734,7 +734,7 @@ export class SignupPage{
                 cy.get('input[type="email"], input[type="text"]').first().clear().type(email);
             }
         });
-        cy.wait(500);
+        // Removed 500ms wait - next command will auto-wait
         
         // Verify email was entered correctly
         cy.get('#email, #emailOrPhone input, input[type="email"], input[type="text"]').first().should('have.value', email);
@@ -742,7 +742,7 @@ export class SignupPage{
         
         // Enter password
         cy.get('input[type="password"]').should('be.visible').clear().type(password);
-        cy.wait(500);
+        // Removed 500ms wait - next command will auto-wait
         
         // Verify password was entered correctly
         cy.get('input[type="password"]').should('have.value', password);
@@ -754,7 +754,8 @@ export class SignupPage{
         cy.log('✅ Login button is now enabled');
         cy.log('🖱️ Clicking Login button...');
         cy.get('#submit-button').click();
-        cy.wait(3000);
+        // Reduced wait from 3000ms to 1000ms - login usually completes quickly
+        cy.wait(1000);
         
         // Check if there's an error message
         cy.get('body').then(($body) => {
@@ -785,7 +786,8 @@ export class SignupPage{
         cy.log('🔍 CHECKING FOR WELCOME MESSAGE AFTER LOGIN');
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
-        cy.wait(3000); // Wait for welcome message to appear
+        // Reduced wait from 3000ms to 1000ms - welcome message usually appears quickly
+        cy.wait(1000);
         
         // Look for "Welcome, You are logged in." message
         cy.get('body').then(($body) => {
@@ -824,7 +826,7 @@ export class SignupPage{
             }
         });
         
-        cy.wait(2000);
+        // Removed 2000ms wait - proceed directly to saving data
         
         // Save user data BEFORE clicking save button
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -867,9 +869,9 @@ export class SignupPage{
         cy.log('Clicking Save button');
         this.clickSaveButton();
         
-        // Wait for save action to complete and check for welcome message
+        // Reduced wait from 3000ms to 1000ms - save action usually completes quickly
         cy.log('Save button clicked - waiting for welcome message...');
-        cy.wait(3000);
+        cy.wait(1000);
         
         // Check for welcome message or success indicator
         cy.log('🔍 Checking for welcome message or success confirmation...');

@@ -20,7 +20,19 @@ describe('Test Sign up Feature For client with Email verification required', () 
 
   it('Complete signup form with Email_verified inside UAE', function() {
     clients.forEach((client, index) => {
-      cy.log(`Testing signup form for client: ${client.name}`);
+      // Log to Cypress UI and HTML reports
+      cy.log(`🔍 Testing signup form for client: ${client.name} (${index + 1}/${clients.length})`);
+      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      cy.log('📋 CLIENT: ' + client.name);
+      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      // Log to terminal console
+      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+      cy.task('log', '📋 TESTING CLIENT: ' + client.name + ' (' + (index + 1) + '/' + clients.length + ')', { log: false });
+      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+      
+      // Store client name in Cypress env for error reporting
+      Cypress.env('currentClient', client.name);
       
       const email = signupPage.createEmail();
       const phoneNumber = signupPage.getPhoneNumber();
@@ -77,7 +89,8 @@ describe('Test Sign up Feature For client with Email verification required', () 
         password: password
       });
       
-      cy.log('✅ Test completed for client: ' + client.name);
+      cy.log('✅ PASSED: ' + client.name);
+      cy.task('log', '✅ PASSED: ' + client.name, { log: false });
       cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     });
   });

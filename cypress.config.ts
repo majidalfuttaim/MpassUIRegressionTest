@@ -30,6 +30,11 @@ export default defineConfig({
         // Gmail API tasks
         on('task', {
           ...gmailTasks,
+          // Console log task for terminal output
+          log(message) {
+            console.log(message);
+            return null;
+          },
         });
 
         return config;

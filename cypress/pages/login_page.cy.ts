@@ -58,8 +58,8 @@ export class LoginPage{
 
     navigateToLoginPage(ClientID: string) {
         cy.visit(''+ ClientID, { timeout: 120000 }); // Increased timeout for visit
-        cy.wait(2000); // Increased wait for page to stabilize
-        cy.get('.w-full', { timeout: 15000 }).last().click(); // Increased timeout for button
+        // Removed 2000ms wait - let Cypress's automatic waiting handle page stability
+        cy.get('.w-full', { timeout: 15000 }).should('be.visible').last().click();
     }
 
     checkThePasswordlessToggleNotExists () {
@@ -127,7 +127,7 @@ export class LoginPage{
                 cy.get('body').click(0, 0, { force: true });
             }
         });
-        cy.wait(500);
+        // Removed 500ms wait - form validation happens automatically
     }
       
     clickOnSubmitButton() {
@@ -135,8 +135,7 @@ export class LoginPage{
         // Wait for submit button to be enabled (form validation to pass)
         cy.get('#submit-button').should('not.be.disabled', { timeout: 10000 });
         cy.get('#submit-button').click({force: true});
-        cy.wait(5000); // Increased wait time after login button click
-        // Wait for welcome message "You are logged in"
+        // Removed 5000ms wait - let subsequent assertions handle waiting
     }
 
     checkMainLogo(){
@@ -192,8 +191,17 @@ export class LoginPage{
         cy.get('input[type="password"]').type(password, {force: true});
     }
 
-    validateWelcomeMessage(){
-        cy.contains(/welcome|you are logged in|logged in/i, { timeout: 10000 }).should('be.visible');
+    validateWelcomeMessage(clientName?: string){
+        const currentClient = clientName || Cypress.env('currentClient') || 'Unknown Client';
+        cy.log('🔍 Validating welcome message for client: ' + currentClient);
+        
+        cy.contains(/welcome|you are logged in|logged in/i, { timeout: 10000 })
+          .should('be.visible')
+          .then(
+            () => {
+              cy.log('✅ Welcome message validated for: ' + currentClient);
+            }
+          );
     }
 
     clickLogoutButton() {
@@ -257,17 +265,12 @@ export class LoginPage{
             }
         });
         
-        // Wait for logout to complete
-        cy.wait(2000);
-        
-        // Verify logout was successful by checking URL or page content
-        cy.url().then((url) => {
-            cy.log(`📍 Current URL after logout: ${url}`);
-            if (url.includes('logout') || url.includes('login') || url.includes('landing')) {
-                cy.log('✅✅✅ LOGOUT SUCCESSFUL - Session cleared ✅✅✅');
-            } else {
-                cy.log('⚠️ Logout may not have completed - current URL: ' + url);
-            }
+        // Verify logout by waiting for URL change instead of arbitrary wait
+        cy.url({ timeout: 5000 }).should((url) => {
+            expect(url.includes('logout') || url.includes('login') || url.includes('landing')).to.be.true;
+        }).then((url) => {
+            cy.log('✅✅✅ LOGOUT SUCCESSFUL - Session cleared ✅✅✅');
+            cy.log(`📍 URL: ${url}`);
         });
         
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

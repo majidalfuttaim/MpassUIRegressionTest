@@ -19,8 +19,20 @@ describe('Test Sign up Feature For client with phone verification required', () 
   });
 
   it('Complete signup form with mobile_verified inside UAE', function() {
-    clients.forEach((client) => {
-      cy.log(`Testing signup form for client: ${client.name}`);
+    clients.forEach((client, index) => {
+      // Log to Cypress UI and HTML reports
+      cy.log(`🔍 Testing signup form for client: ${client.name} (${index + 1}/${clients.length})`);
+      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      cy.log('📋 CLIENT: ' + client.name);
+      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      
+      // Log to terminal console
+      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+      cy.task('log', '📋 TESTING CLIENT: ' + client.name + ' (' + (index + 1) + '/' + clients.length + ')', { log: false });
+      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+      
+      // Store client name in Cypress env for error reporting
+      Cypress.env('currentClient', client.name);
       
       const email = signupPage.createEmail();
       const phoneNumber = signupPage.getPhoneNumber();
@@ -66,24 +78,21 @@ describe('Test Sign up Feature For client with phone verification required', () 
       cy.log('Clicking Send OTP button');
       signupPage.clickSendOTPButton();
       
-      // Wait for OTP to be sent and page to be ready
+      // Removed 3000ms wait - OTP fields will be ready when accessed
       cy.log('Waiting for OTP fields to be ready');
-      cy.wait(3000);
       
       // Enter OTP code
       cy.log('🔢 Entering OTP code: 123456');
       signupPage.enterOTPCode('123456');
       
-      // Verify OTP was entered
+      // Removed 1000ms wait - next command will auto-wait
       cy.log('Verifying OTP was entered');
-      cy.wait(1000);
       
       // Click continue/verify button
       cy.log('Clicking Continue button');
       signupPage.clickVerifyOTPButton();
       
-      // Wait for next page to load
-      cy.wait(2000);
+      // Removed 2000ms wait - page will load automatically
       
       // Save user data BEFORE clicking save button (to ensure it's saved even if save fails)
       cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -126,9 +135,9 @@ describe('Test Sign up Feature For client with phone verification required', () 
       cy.log('Clicking Save button');
       signupPage.clickSaveButton();
       
-      // Wait for save action to complete
+      // Reduced wait from 2000ms - save action usually completes quickly
       cy.log('Save button clicked - completing signup process...');
-      cy.wait(2000);
+      cy.wait(1000);
       
       // Mark test as passed
       cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -149,6 +158,10 @@ describe('Test Sign up Feature For client with phone verification required', () 
       cy.log('🚪 LOGGING OUT TO CLEAR SESSION');
       cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       signupPage.clickLogoutButton();
+      
+      // Log success
+      cy.log('✅ PASSED: ' + client.name);
+      cy.task('log', '✅ PASSED: ' + client.name, { log: false });
       
       // Final assertion to pass the test
       expect(true).to.be.true;
