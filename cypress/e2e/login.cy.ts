@@ -18,32 +18,19 @@ describe('Test Login Feature with client IDs from fixture file', () => {
   it('Check Login successfully by Username(Phonenumber) for user that has verified email and phone number' , function() {
     const phone =users[0].phoneNumber;
     clients.forEach((client, index) => {
-      // Log to Cypress
-      cy.log(`🔍 Testing client: ${client.name} (${index + 1}/${clients.length})`);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      cy.log('📋 CLIENT: ' + client.name);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      // Log to terminal console
-      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
-      cy.task('log', '📋 TESTING CLIENT: ' + client.name + ' (' + (index + 1) + '/' + clients.length + ')', { log: false });
-      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
-      
       // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
-      loginPage.navigateToLoginPage(client.clientId);
+      loginPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
       if(  client.phoneLogin == true){
         loginPage.typeInEmailInputFiled(phone);
         loginPage.typeInPasswordInputFiled('Test@123');
         loginPage.clickOnSubmitButton();
         loginPage.validateWelcomeMessage(client.name);
         loginPage.clickLogoutButton();
-        cy.log('✅ PASSED: ' + client.name);
-        cy.task('log', '✅ PASSED: ' + client.name, { log: false });
+        loginPage.logTestPassed(client.name);
       }else{
-        cy.log('⏭️ SKIPPED: ' + client.name + ' - does not have phone login enabled');
-        cy.task('log', '⏭️ SKIPPED: ' + client.name, { log: false });
+        loginPage.logTestSkipped(client.name, 'does not have phone login enabled');
       }
     });
   });
@@ -52,56 +39,32 @@ describe('Test Login Feature with client IDs from fixture file', () => {
     const email =users[0].email;
     const password =users[0].password
     clients.forEach((client, index) => {
-      // Log to Cypress
-      cy.log(`🔍 Testing client: ${client.name} (${index + 1}/${clients.length})`);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      cy.log('📋 CLIENT: ' + client.name);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      // Log to terminal console
-      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
-      cy.task('log', '📋 TESTING CLIENT: ' + client.name + ' (' + (index + 1) + '/' + clients.length + ')', { log: false });
-      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
-      
       // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
-      loginPage.navigateToLoginPage(client.clientId);
+      loginPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
       loginPage.typeInEmailInputFiled(email);
       loginPage.typeInPasswordInputFiled('Test@123');
       loginPage.clickOnSubmitButton();
       loginPage.validateWelcomeMessage(client.name);
       loginPage.clickLogoutButton();
-      cy.log('✅ PASSED: ' + client.name);
-      cy.task('log', '✅ PASSED: ' + client.name, { log: false });
+      loginPage.logTestPassed(client.name);
     });
   });
 
   it('Check Main login page elements: ' , function() {
     clients.forEach((client, index) => {
-      // Log to Cypress
-      cy.log(`🔍 Testing client: ${client.name} (${index + 1}/${clients.length})`);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      cy.log('📋 CLIENT: ' + client.name);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      // Log to terminal console
-      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
-      cy.task('log', '📋 TESTING CLIENT: ' + client.name + ' (' + (index + 1) + '/' + clients.length + ')', { log: false });
-      cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
-      
       // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
-      loginPage.navigateToLoginPage(client.clientId)
+      loginPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
       loginPage.checkLoginMainLabel()
       loginPage.checkMainLogo()
       loginPage.checkTheEmailFiled()
       loginPage.checkPasswordFiled()
       loginPage.checkSubmitLoginBtn()
       loginPage.checkFooterCopy()
-      cy.log('✅ PASSED: ' + client.name);
-      cy.task('log', '✅ PASSED: ' + client.name, { log: false });
+      loginPage.logTestPassed(client.name);
     });
   });
 
