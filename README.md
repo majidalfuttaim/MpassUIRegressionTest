@@ -261,10 +261,6 @@ Additional documentation:
 - If session persists, check logout button implementation
 - Clear browser data manually if needed
 
-## 📄 License
-
-[Add your license here]
-
 ## 👥 Authors
 
-[Add your team information here]
+Baraa issa : Sr.quality engineer, Digital labs.
