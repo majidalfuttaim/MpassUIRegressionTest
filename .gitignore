@@ -1,0 +1,96 @@
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ============================================
+# Cypress Generated Files
+# ============================================
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+cypress/reports/
+
+# ============================================
+# Gmail API Credentials - SENSITIVE - DO NOT COMMIT
+# ============================================
+credentials.json
+token.json
+
+# ============================================
+# Test Generated Data - DO NOT COMMIT
+# ============================================
+cypress/fixtures/usersStaging.json
+cypress/output.json
+
+# ============================================
+# Environment Files - May contain secrets
+# ============================================
+.env
+.env.local
+.env.*.local
+cypress.env.json
+
+# ============================================
+# IDE and Editor Files
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Logs
+# ============================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Build and Compiled Files
+# ============================================
+dist/
+build/
+*.tsbuildinfo
+.cache/
+
+# ============================================
+# Test Reports and Coverage
+# ============================================
+coverage/
+.nyc_output/
+*.html
+*.xml
+mochawesome-report/
+.test-results/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+.tmp/

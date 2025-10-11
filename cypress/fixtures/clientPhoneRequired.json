@@ -1,0 +1,13 @@
+{
+    "clientDetails":[
+
+        {
+            "name": "MAFID-SHARE",
+            "clientId": "MXXhGjArRaC9MxQTGKTwydAazNTNSA1X",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+        }
+    ] 
+}

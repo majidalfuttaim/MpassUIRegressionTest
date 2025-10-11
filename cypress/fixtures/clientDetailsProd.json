@@ -1,0 +1,228 @@
+{
+    "clientDetails":[
+        {
+            "name": "MAFID-VOX",
+            "clientId": "v0uVcrcyayqiTSbRUJPAWz2YJNN1tHTy#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true
+        },
+        {
+            "name": "MAFID-SHARE",
+            "clientId": "bN1YiObxLzbCkU6z6lRdE8jpGgEM2bqG#/",
+            "passwordLessEmail": false,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-LEGO",
+            "clientId": "zISrnnxfS19jUJTUAtnFaTUkAJ27r8mE#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-MOE",
+            "clientId": "8VdAQsuIqDPQhsNC1sNQtS2Jf7anninl#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-CRATE-BARREL",
+            "clientId": "C1o8u0aPez0Qs5W5TGa1Cbpxq8Ieb63G#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-THAT",
+            "clientId": "I3ev7JpJpG4tmIKuXfQ5s29e1uUgtdaL#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-THAT-Mobile",
+            "clientId": "gbYSXvAJqSRL0gb76oaWWBojroIDBJrb#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-THAT-WEB",
+            "clientId": "QqDeHIWqIDBF7b09NLL1su2u5zIYazui#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-VOX-MOBILE",
+            "clientId": "9AHmz8YYRY6OVVTNHtLKjrFgwovO1eDE#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true
+        },
+        {
+            "name": "MAFID-CBU",
+            "clientId": "abGQxSUDBML2iWEP9P1KWjxnUi7RwfT1#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-ALLSAINTS",
+            "clientId": "kfwPMuCVbxNPvPpfDKiyvgVvHWmThXc8#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-CB2",
+            "clientId": "VhYxO10cBfgbvQ1KzcO0XYIsz9kLahZ6#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-MAGIC-PLANET-SPA",
+            "clientId": "rFG4zXZa54CCPxIJFPGMN0iLDvlLn09m#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : true
+        },
+        {
+            "name": "MAFID-MOE-AUTH",
+            "clientId": "FLXp05jrvXmHP03rk5mIoRABc0hxuxey#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-MOE-MOBILE",
+            "clientId": "mPbXCx7lA4dQNyEhhyCGMV6XKjuccbk8#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-FAB",
+            "clientId": "hqrMBSRmjuH85ACKnBvUEvOoBJllGPWn#/",
+            "passwordLessEmail": false,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-DREAMSCAPE",
+            "clientId": "p1Ji7cKQ7RG5KU3Jjuke5ZMG6vfWe0IV#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin": true
+        },
+        {
+            "name": "MAFID-LULULEMON",
+            "clientId": "cVKq6LLRMatW9j7th1nHp15WC8ooTmoG#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-MARKETPLACE",
+            "clientId": "XSBqgbI3bVXqcQJtdPoFbtxVNArCul8M#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-SKI-DUBAI",
+            "clientId": "0dfwUn870OFm3aebVTKv0xz1viKKyXlL#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true
+
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW",
+            "clientId": "xD0k7coKl4VeyT6rIB4RE16nX4g8dvOC#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : true
+
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW-MOBILE",
+            "clientId": "6NbnL5sgkUN4qPqJ5zr6R0CLWnEXPQSY#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : true
+
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW-AD",
+            "clientId": "Vw8w1CSuNGk02B0QgeZQnSOx7CmtewBP#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : true
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW-OMAN",
+            "clientId": "zzY2uKmpycWb3FCW2MTsEkPACzHokNPw#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : true
+        },
+        {
+            "name": "MAFID-SHISHIEDO",
+            "clientId": "eIws913dyuipIXJ9Ogg08C9wogwzalb5#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-HYPE",
+            "clientId": "KW49vsE4CM55X3Uyb7E8QRPRTN5hrF0y#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-CARISTA",
+            "clientId": "Si1lyulGzwbbIdLWcXOHTuOEz9osVnnH#/",
+            "passwordLessEmail": false,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-PSYCHOBUNNY",
+            "clientId": "YfCi2PIt2od3En3CLKlcouUGD85v4OGk#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-UC",
+            "clientId": "stX8YGpKzooE5uPPGYJ2b4HMEoQnb0RE#/",
+            "passwordLessEmail": false,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-ACTIVATE",
+            "clientId": "2RWX5MlbMyzTXtoGfDyTp614CVYnQbVg#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin": true
+        }
+    ],
+    "userDetails":[     
+        {
+        "phoneVerified": true,
+        "email": "baramaf9+auto@gmail.com",
+        "password": "Test@123",
+        "phoneNumber": "994401234111"
+        }  
+    ] 
+    
+
+
+}

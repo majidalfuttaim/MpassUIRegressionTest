@@ -1,0 +1,19 @@
+{
+    "clientDetails":[
+
+        {
+            "name": "MAFID-MOE",
+            "clientId": "apilLF4iBPvBGHc6j0otJl571RoLtiC5",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        },
+        {
+            "name": "MAFID-MOE-MOBILE",
+            "clientId": "htBEYjTWH8eFI6vwku22FwTTkWhtoYCM",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false
+        }
+    ] 
+}

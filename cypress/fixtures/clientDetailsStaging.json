@@ -1,0 +1,190 @@
+{
+    "clientDetails":[
+        {
+            "name": "MAFID-VOX",
+            "clientId": "ApmuVd701ER4hkYG7j4u5TkvXhCHPykR",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : false,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-SHARE",
+            "clientId": "MXXhGjArRaC9MxQTGKTwydAazNTNSA1X",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-LEGO",
+            "clientId": "SAH2nwPAirTqDWwtFeGGm5WiR5ecmbnj",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-MOE",
+            "clientId": "apilLF4iBPvBGHc6j0otJl571RoLtiC5",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true
+        },
+        {
+            "name": "MAFID-CRATE-BARREL",
+            "clientId": "KVyOXFA9YriOFbTQ9xwf76xWQJb72zHZ",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-THAT",
+            "clientId": "LAFZqGqD8h7oqIczeEcxOBJXVXNs2hLh",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-THAT-Mobile",
+            "clientId": "HuT4Q8Bv85cxqmG60bd8tcCFUcMgEYYQ",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-VOX-MOBILE",
+            "clientId": "tXxY2cLjah13hMtZJbMSn2jX9FR9e8Z9",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-CBU",
+            "clientId": "7jaUIxbZSnJHkhVzjBG2BzFdp4NIIrCq",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-ALLSAINTS",
+            "clientId": "jAI17OEvN9J0qOI89XAY4VwGNm8bdP5F",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-CB2",
+            "clientId": "bPjKzJSXVdG5vXBFctwWESN5DzfJymU1",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-MOE-AUTH",
+            "clientId": "KzCUCP0LnCEEDeRqp2FY1lIfyQ7bTh3x",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-MOE-MOBILE",
+            "clientId": "htBEYjTWH8eFI6vwku22FwTTkWhtoYCM#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : false,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-DREAMSCAPE",
+            "clientId": "mg748jses1ktAZn1S5Z8ITKTOnBo7d88",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin": true,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-MARKETPLACE",
+            "clientId": "6lz0qAv0KHFbPoq7qhGNrfgm6JLResGa",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-SKI-DUBAI",
+            "clientId": "jqXGoURFgC7OyXx9bNtjW3GG2fIye0ns#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW",
+            "clientId": "Oj7LbsyPqlU3uTAEKOD52a3kpQFfzbrk",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW-MOBILE",
+            "clientId": "7fCoEC5MUOGfwMBHPqrsGtePmj9NXTFH",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : true
+
+        },
+        {
+            "name": "MAFID-GLOBAL-SNOW-OMAN",
+            "clientId": "4de7Dhdn5R0miD8F5Q2jDpH3CxLwzKyO#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : false,
+            "googleLogin" : true,
+            "phoneLogin" : true
+        },
+        {
+            "name": "MAFID-SHISHIEDO",
+            "clientId": "DVRSqwt9HMDckkBLLyyjwTAq0kyayAmp",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-PSYCHOBUNNY",
+            "clientId": "EiyQm2lv9BSKqZnkfOc9MrRfLWA4Yqxs",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        },
+        {
+            "name": "MAFID-ACTIVATE",
+            "clientId": "oIWc1uk4IoIyP5oHUx5NwpnUls9XUYO2#/",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin": true,
+            "phoneLogin" : false
+        }
+    ] ,
+    "userDetails":[     
+        {
+        "phoneVerified": true,
+        "email": "baramaf9+auto@gmail.com",
+        "password": "Test@123",
+        "phoneNumber": "509009111"
+        }  
+    ]
+}
