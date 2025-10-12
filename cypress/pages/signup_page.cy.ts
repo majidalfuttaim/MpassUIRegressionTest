@@ -12,6 +12,98 @@ export class SignupPage{
         this.randomPhoneNumber = this.generateRandomPhoneNumber();
     }
 
+    // Logging methods
+    logClientTest(clientName: string, currentIndex: number, totalClients: number) {
+        cy.log(`🔍 Testing signup form for client: ${clientName} (${currentIndex}/${totalClients})`);
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('📋 CLIENT: ' + clientName);
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+        cy.task('log', '📋 TESTING CLIENT: ' + clientName + ' (' + currentIndex + '/' + totalClients + ')', { log: false });
+        cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+    }
+
+    logFillingForm() {
+        cy.log('Filling signup form');
+    }
+
+    logSelectingNationality() {
+        cy.log('Selecting first nationality');
+    }
+
+    logNationalitySelected(nationality: string) {
+        cy.log(`✅ Captured nationality: ${nationality}`);
+    }
+
+    logEnteringPassword() {
+        cy.log('Entering password');
+    }
+
+    logSubmittingForm() {
+        cy.log('Submitting signup form');
+    }
+
+    logVerifyingEmail() {
+        cy.log('📧 Verifying email from inbox (Gmail API will auto-click verify link and return to login page)');
+    }
+
+    logWaitingForOTP() {
+        cy.log('Waiting for OTP verification page');
+    }
+
+    logClickingSendOTP() {
+        cy.log('Clicking Send OTP button');
+    }
+
+    logWaitingForOTPFields() {
+        cy.log('Waiting for OTP fields to be ready');
+    }
+
+    logEnteringOTP() {
+        cy.log('🔢 Entering OTP code: 123456');
+    }
+
+    logVerifyingOTP() {
+        cy.log('Verifying OTP was entered');
+    }
+
+    logClickingContinue() {
+        cy.log('Clicking Continue button');
+    }
+
+    logSavingUserData() {
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('📝 SAVING USER DATA TO FIXTURE FILE NOW...');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+
+    logUserCount(count: number, newUserKey: string) {
+        cy.log(`📂 Current number of users: ${count}`);
+        cy.log(`➕ Adding new user as: ${newUserKey}`);
+    }
+
+    logTotalUsers(count: number) {
+        cy.log(`📂 Total users after adding: ${count}`);
+    }
+
+    logWritingToFile() {
+        cy.log('💾 Writing to cypress/fixtures/usersStaging.json...');
+    }
+
+    logUserDataWritten(newUserKey: string, newUser: any) {
+        cy.log(`✅✅✅ User data written to usersStaging.json as '${newUserKey}' ✅✅✅`);
+        cy.log(`✅ Data saved: ${JSON.stringify(newUser, null, 2)}`);
+    }
+
+    logClickingSaveButton() {
+        cy.log('Clicking Save button');
+    }
+
+    logSaveButtonClicked() {
+        cy.log('Save button clicked - completing signup process...');
+    }
+
     private generateRandomNumber(): number {
         return Math.floor(1000 + Math.random() * 9000);
     }
