@@ -93,8 +93,8 @@ export class LoginPage{
         }
         
         cy.visit(''+ ClientID, { timeout: 120000 }); // Increased timeout for visit
-        // Removed 2000ms wait - let Cypress's automatic waiting handle page stability
-        cy.get('.w-full', { timeout: 15000 }).should('be.visible').last().click();
+        // Find and click any button/link containing "Login" text
+        cy.contains('button, a', /login/i, { timeout: 15000 }).should('be.visible').click();
     }
 
     checkThePasswordlessToggleNotExists () {
@@ -380,16 +380,4 @@ export class LoginPage{
 
 
 
-   
-
-    // Logging helper methods
-    logTestPassed(clientName: string) {
-        cy.log('✅ PASSED: ' + clientName);
-        cy.task('log', '✅ PASSED: ' + clientName, { log: false });
-    }
-
-    logTestSkipped(clientName: string, reason: string) {
-        cy.log('⏭️ SKIPPED: ' + clientName + ' - ' + reason);
-        cy.task('log', '⏭️ SKIPPED: ' + clientName, { log: false });
-    }
 }

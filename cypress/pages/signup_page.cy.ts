@@ -468,18 +468,18 @@ export class SignupPage{
         cy.visit(landingUrl);
         cy.wait(2000);
         
-        // Step 2: Click on login page button
+        // Step 2: Click on login page button - find any button/link containing "Login"
         cy.log('🔘 Clicking on Login button');
-        cy.get('#app > main > div > a').click({force: true});
+        cy.contains('button, a', /login/i, { timeout: 15000 }).should('be.visible').click();
         cy.log('✅ Clicked login button on landing page');
         
         // Step 3: Wait for login page to fully load
         cy.log('⏳ Waiting for login page to load...');
         cy.wait(3000);
         
-        // Step 4: Click on register/sign-up link using href attribute
-        cy.log('� Clicking on Register label');
-        cy.get('[href*="sign-up"]').should('be.visible').click({force: true});
+        // Step 4: Click on register/sign-up link - find any button/link containing "Register" or "Sign up"
+        cy.log('🔘 Clicking on Register label');
+        cy.contains('button, a', /(register|sign up|sign-up|signup)/i, { timeout: 15000 }).should('be.visible').click();
         cy.log('✅ Clicked register link');
         
         // Step 5: Wait for signup page to load
