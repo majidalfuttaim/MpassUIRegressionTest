@@ -12,6 +12,28 @@ export class LoginPage{
         this.continueBtn = '#submit-button'; // Replace with your actual selector
     }
 
+    // Logging methods
+    logClientTest(clientName: string, currentIndex: number, totalClients: number) {
+        cy.log(`🔍 Testing client: ${clientName} (${currentIndex}/${totalClients})`);
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('📋 CLIENT: ' + clientName);
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+        cy.task('log', '📋 TESTING CLIENT: ' + clientName + ' (' + currentIndex + '/' + totalClients + ')', { log: false });
+        cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+    }
+
+    logTestPassed(clientName: string) {
+        cy.log('✅ PASSED: ' + clientName);
+        cy.task('log', '✅ PASSED: ' + clientName, { log: false });
+    }
+
+    logTestSkipped(clientName: string, reason: string) {
+        cy.log('⏭️ SKIPPED: ' + clientName + ' - ' + reason);
+        cy.task('log', '⏭️ SKIPPED: ' + clientName, { log: false });
+    }
+
     public checkEmailPlaceholder(): boolean {
     
 
