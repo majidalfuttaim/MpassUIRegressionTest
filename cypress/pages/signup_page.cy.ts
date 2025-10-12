@@ -445,7 +445,20 @@ export class SignupPage{
     }
 
     // Navigate to signup page via landing page flow
-    navigateToSignupPage(clientId: string) {
+    navigateToSignupPage(clientId: string, clientName?: string, currentIndex?: number, totalClients?: number) {
+        // Log client testing start if name provided
+        if (clientName && currentIndex && totalClients) {
+            cy.log(`🔍 Testing signup form for client: ${clientName} (${currentIndex}/${totalClients})`);
+            cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            cy.log('📋 CLIENT: ' + clientName);
+            cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            // Log to terminal console
+            cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+            cy.task('log', '📋 TESTING CLIENT: ' + clientName + ' (' + currentIndex + '/' + totalClients + ')', { log: false });
+            cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+        }
+        
         // Remove trailing #/ from clientId if present to avoid URL conflicts
         const cleanClientId = clientId.replace(/#\/$/, '');
         
@@ -872,7 +885,7 @@ export class SignupPage{
         phoneNumber: string;
         nationality: string;
         password: string;
-    }) {
+    }, clientName?: string) {
         // First, verify the welcome message after login
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         cy.log('🔍 CHECKING FOR WELCOME MESSAGE AFTER LOGIN');
@@ -1020,8 +1033,71 @@ export class SignupPage{
         cy.log('🚪 LOGGING OUT TO CLEAR SESSION');
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         this.clickLogoutButton();
+        
+        // Log success if client name provided
+        if (clientName) {
+            cy.log('✅ PASSED: ' + clientName);
+            cy.task('log', '✅ PASSED: ' + clientName, { log: false });
+            cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        }
+    }
+
+    // Helper method to save phone verified user data
+    savePhoneVerifiedUserData(firstName: string, lastName: string, email: string, phoneNumber: string, nationality: string, password: string) {
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('📝 SAVING USER DATA TO FIXTURE FILE NOW...');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        cy.fixture(`usersStaging.json`).then((usersData: any) => {
+            const existingUserKeys = Object.keys(usersData);
+            const userCount = existingUserKeys.filter(key => key.startsWith('user')).length;
+            const newUserKey = `user${userCount}`;
+            
+            cy.log(`📂 Current number of users: ${userCount}`);
+            cy.log(`➕ Adding new user as: ${newUserKey}`);
+            
+            const newUser = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email, 
+                phoneNumber: phoneNumber,
+                nationality: nationality || 'Unknown',
+                password: password,
+                mobile_verified: true
+            };
+            
+            usersData[newUserKey] = newUser;
+            cy.log(`📂 Total users after adding: ${userCount + 1}`);
+            
+            cy.log('💾 Writing to cypress/fixtures/usersStaging.json...');
+            return cy.writeFile('cypress/fixtures/usersStaging.json', usersData).then(() => {
+                cy.log(`✅✅✅ User data written to usersStaging.json as '${newUserKey}' ✅✅✅`);
+                cy.log(`✅ Data saved: ${JSON.stringify(newUser, null, 2)}`);
+            });
+        });
+        
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('🎉 TEST PASSED: User signup completed successfully!');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('User Details Saved:');
+        cy.log(`  First Name: ${firstName}`);
+        cy.log(`  Last Name: ${lastName}`);
+        cy.log(`  Email: ${email}`);
+        cy.log(`  Phone: ${phoneNumber}`);
+        cy.log(`  Nationality: ${nationality || 'Unknown'}`);
+        cy.log(`  Password: ${password}`);
+        cy.log(`  Mobile Verified: true`);
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+
+    // Logging helper method
+    logTestPassed(clientName: string) {
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('🚪 LOGGING OUT TO CLEAR SESSION');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('✅ PASSED: ' + clientName);
+        cy.task('log', '✅ PASSED: ' + clientName, { log: false });
     }
 
 }
-
 

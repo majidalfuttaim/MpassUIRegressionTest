@@ -20,7 +20,7 @@ describe('Test Sign up Feature For client with Email verification required', () 
 
   it('Complete signup form with Email_verified inside UAE', function() {
     clients.forEach((client, index) => {
-      signupPage.logClientTest(client.name, index + 1, clients.length);
+      // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
       const email = signupPage.createEmail();
@@ -30,9 +30,10 @@ describe('Test Sign up Feature For client with Email verification required', () 
       const lastName = 'Test';
       let selectedNationality = '';
       
-      signupPage.navigateToSignupPage(client.clientId);
+      // Navigate to the signup page with logging
+      signupPage.navigateToSignupPage(client.clientId, client.name, index + 1, clients.length);
       
-      signupPage.logFillingForm();
+      // Fill in the signup form
       signupPage.clickOnTitleTogle();
       signupPage.addFirstName(firstName);
       signupPage.addLastName(lastName);
@@ -41,23 +42,24 @@ describe('Test Sign up Feature For client with Email verification required', () 
       signupPage.clickOnCountry();
       signupPage.addPhoneInsideTheField(phoneNumber);
       
-      signupPage.logSelectingNationality();
+      // Add nationality and capture the selected value
       signupPage.selectRandomNationality().then((nationality: string) => {
         selectedNationality = nationality;
-        signupPage.logNationalitySelected(selectedNationality);
       });
       
-      signupPage.logEnteringPassword();
+      // Add password
       signupPage.addPasswordToField(password);
             
-      signupPage.logSubmittingForm();
+      // Submit the form
       signupPage.clickSignupSubmitButton();
       
-      signupPage.logVerifyingEmail();
+      // Verify email from inbox - Gmail API will fetch email, click verification link, and navigate back to login
       signupPage.verifyEmailFromInbox(email, client.clientId);
       
+      // Close any popup that might appear after returning to login page
       signupPage.closeSignupPopup();
       
+      // Login with newly created credentials (email is already verified at this point)
       signupPage.loginAfterSignup(email, password);
     
       // Complete verification and save user data
@@ -68,11 +70,7 @@ describe('Test Sign up Feature For client with Email verification required', () 
         phoneNumber: phoneNumber,
         nationality: selectedNationality,
         password: password
-      });
-      
-      cy.log('✅ PASSED: ' + client.name);
-      cy.task('log', '✅ PASSED: ' + client.name, { log: false });
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }, client.name);
     });
   });
  

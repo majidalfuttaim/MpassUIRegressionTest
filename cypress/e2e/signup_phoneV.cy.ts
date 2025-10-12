@@ -20,7 +20,7 @@ describe('Test Sign up Feature For client with phone verification required', () 
 
   it('Complete signup form with mobile_verified inside UAE', function() {
     clients.forEach((client, index) => {
-      signupPage.logClientTest(client.name, index + 1, clients.length);
+      // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
       const email = signupPage.createEmail();
@@ -30,9 +30,10 @@ describe('Test Sign up Feature For client with phone verification required', () 
       const lastName = 'Test';
       let selectedNationality = '';
       
-      signupPage.navigateToSignupPage(client.clientId);
+      // Navigate to the signup page with logging
+      signupPage.navigateToSignupPage(client.clientId, client.name, index + 1, clients.length);
       
-      signupPage.logFillingForm();
+      // Fill in the signup form
       signupPage.clickOnTitleTogle();
       signupPage.addFirstName(firstName);
       signupPage.addLastName(lastName);
@@ -41,93 +42,43 @@ describe('Test Sign up Feature For client with phone verification required', () 
       signupPage.clickOnCountry();
       signupPage.addPhoneInsideTheField(phoneNumber);
       
-      signupPage.logSelectingNationality();
+      // Add nationality and capture the selected value
       signupPage.selectRandomNationality().then((nationality: string) => {
         selectedNationality = nationality;
-        signupPage.logNationalitySelected(selectedNationality);
       });
       
-      signupPage.logEnteringPassword();
+      // Add password and confirm password
       signupPage.addPasswordToField(password);
       signupPage.addConfirmPassword(password);
       
-      signupPage.logSubmittingForm();
+      // Submit the form
       signupPage.clickSignupSubmitButton();
       
-      signupPage.logWaitingForOTP();
+      // Wait for OTP page to load
       signupPage.waitForOTPPage();
       
-      signupPage.logClickingSendOTP();
+      // Click on Send OTP button
       signupPage.clickSendOTPButton();
       
-      signupPage.logWaitingForOTPFields();
-      
-      signupPage.logEnteringOTP();
+      // Enter OTP code
       signupPage.enterOTPCode('123456');
       
-      signupPage.logVerifyingOTP();
-      
-      signupPage.logClickingContinue();
+      // Click continue/verify button
       signupPage.clickVerifyOTPButton();
       
-      signupPage.logSavingUserData();
+      // Save user data to fixture
+      signupPage.savePhoneVerifiedUserData(firstName, lastName, email, phoneNumber, selectedNationality, password);
       
-      cy.fixture(`usersStaging.json`).then((usersData: any) => {
-        const existingUserKeys = Object.keys(usersData);
-        const userCount = existingUserKeys.filter(key => key.startsWith('user')).length;
-        const newUserKey = `user${userCount}`;
-        
-        signupPage.logUserCount(userCount, newUserKey);
-        
-        const newUser = {
-          firstName: firstName,
-          lastName: lastName,
-          email: email, 
-          phoneNumber: phoneNumber,
-          nationality: selectedNationality || 'Unknown',
-          password: password,
-          mobile_verified: true
-        };
-        
-        usersData[newUserKey] = newUser;
-        
-        signupPage.logTotalUsers(userCount + 1);
-        
-        signupPage.logWritingToFile();
-        return cy.writeFile('cypress/fixtures/usersStaging.json', usersData).then(() => {
-          signupPage.logUserDataWritten(newUserKey, newUser);
-        });
-      });
-      
-      signupPage.logClickingSaveButton();
+      // Click Save button on the next page
       signupPage.clickSaveButton();
       
-      signupPage.logSaveButtonClicked();
       cy.wait(1000);
       
-      // Mark test as passed
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      cy.log('🎉 TEST PASSED: User signup completed successfully!');
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      cy.log('User Details Saved:');
-      cy.log(`  First Name: ${firstName}`);
-      cy.log(`  Last Name: ${lastName}`);
-      cy.log(`  Email: ${email}`);
-      cy.log(`  Phone: ${phoneNumber}`);
-      cy.log(`  Nationality: ${selectedNationality || 'Unknown'}`);
-      cy.log(`  Password: ${password}`);
-      cy.log(`  Mobile Verified: true`);
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      // Logout after test completion to ensure clean state for next test
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      cy.log('🚪 LOGGING OUT TO CLEAR SESSION');
-      cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // Logout after test completion
       signupPage.clickLogoutButton();
       
       // Log success
-      cy.log('✅ PASSED: ' + client.name);
-      cy.task('log', '✅ PASSED: ' + client.name, { log: false });
+      signupPage.logTestPassed(client.name);
       
       // Final assertion to pass the test
       expect(true).to.be.true;

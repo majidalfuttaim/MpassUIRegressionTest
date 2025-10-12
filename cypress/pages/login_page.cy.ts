@@ -78,7 +78,20 @@ export class LoginPage{
 
     
 
-    navigateToLoginPage(ClientID: string) {
+    navigateToLoginPage(ClientID: string, clientName?: string, currentIndex?: number, totalClients?: number) {
+        // Log client testing start if name provided
+        if (clientName && currentIndex && totalClients) {
+            cy.log(`🔍 Testing client: ${clientName} (${currentIndex}/${totalClients})`);
+            cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            cy.log('📋 CLIENT: ' + clientName);
+            cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            // Log to terminal console
+            cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+            cy.task('log', '📋 TESTING CLIENT: ' + clientName + ' (' + currentIndex + '/' + totalClients + ')', { log: false });
+            cy.task('log', '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', { log: false });
+        }
+        
         cy.visit(''+ ClientID, { timeout: 120000 }); // Increased timeout for visit
         // Removed 2000ms wait - let Cypress's automatic waiting handle page stability
         cy.get('.w-full', { timeout: 15000 }).should('be.visible').last().click();
@@ -369,4 +382,14 @@ export class LoginPage{
 
    
 
+    // Logging helper methods
+    logTestPassed(clientName: string) {
+        cy.log('✅ PASSED: ' + clientName);
+        cy.task('log', '✅ PASSED: ' + clientName, { log: false });
+    }
+
+    logTestSkipped(clientName: string, reason: string) {
+        cy.log('⏭️ SKIPPED: ' + clientName + ' - ' + reason);
+        cy.task('log', '⏭️ SKIPPED: ' + clientName, { log: false });
+    }
 }

@@ -18,10 +18,10 @@ describe('Test Login Feature with client IDs from fixture file', () => {
   it('Check Login successfully by Username(Phonenumber) for user that has verified email and phone number' , function() {
     const phone =users[0].phoneNumber;
     clients.forEach((client, index) => {
-      loginPage.logClientTest(client.name, index + 1, clients.length);
+      // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
-      loginPage.navigateToLoginPage(client.clientId);
+      loginPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
       if(  client.phoneLogin == true){
         loginPage.typeInEmailInputFiled(phone);
         loginPage.typeInPasswordInputFiled('Test@123');
@@ -39,10 +39,10 @@ describe('Test Login Feature with client IDs from fixture file', () => {
     const email =users[0].email;
     const password =users[0].password
     clients.forEach((client, index) => {
-      loginPage.logClientTest(client.name, index + 1, clients.length);
+      // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
-      loginPage.navigateToLoginPage(client.clientId);
+      loginPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
       loginPage.typeInEmailInputFiled(email);
       loginPage.typeInPasswordInputFiled('Test@123');
       loginPage.clickOnSubmitButton();
@@ -54,10 +54,10 @@ describe('Test Login Feature with client IDs from fixture file', () => {
 
   it('Check Main login page elements: ' , function() {
     clients.forEach((client, index) => {
-      loginPage.logClientTest(client.name, index + 1, clients.length);
+      // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
       
-      loginPage.navigateToLoginPage(client.clientId)
+      loginPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
       loginPage.checkLoginMainLabel()
       loginPage.checkMainLogo()
       loginPage.checkTheEmailFiled()
