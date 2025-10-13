@@ -620,6 +620,11 @@ export class SignupPage{
     waitForOTPPage() {
         // Wait for OTP page - URL might include 'verify' or 'otp'
         cy.url({ timeout: 15000 }).should('satisfy', (url: string) => {
+            // Add null check to prevent "Cannot read properties of null" error
+            if (!url) {
+                cy.log('⚠️ URL is not yet available, waiting...');
+                return false;
+            }
             const isOTPPage = url.includes('verify') || url.includes('otp') || url.includes('verification');
             if (!isOTPPage) {
                 cy.log(`⚠️ Current URL: ${url}`);
