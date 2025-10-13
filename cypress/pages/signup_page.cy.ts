@@ -163,6 +163,8 @@ export class SignupPage{
 
     clickOnCountry() {
         cy.get('.text-left > :nth-child(4)').scrollIntoView().click({scrollBehavior:false, force: true});
+        // Wait for the page re-render to complete and phone input to be stable
+        cy.get('#phoneNumber').should('be.visible').should('not.be.disabled');
         cy.wait(500); // Small wait for dropdown to close and page to stabilize
     }
 
