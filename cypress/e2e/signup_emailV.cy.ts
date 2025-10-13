@@ -18,7 +18,7 @@ describe('Test Sign up Feature For client with Email verification required', () 
     });
   });
 
-  it('Complete signup form with Email_verified inside UAE', function() {
+  it('Complete signup form with Email_verified inside UAE and without displaying continue screen', function() {
     clients.forEach((client, index) => {
       // Store client name in Cypress env for error reporting
       Cypress.env('currentClient', client.name);
@@ -71,6 +71,9 @@ describe('Test Sign up Feature For client with Email verification required', () 
         nationality: selectedNationality,
         password: password
       }, client.name);
+      
+      // Logout after successful signup and verification
+      signupPage.clickLogoutButton();
     });
   });
  

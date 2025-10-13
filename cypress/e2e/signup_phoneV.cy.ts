@@ -66,11 +66,16 @@ describe('Test Sign up Feature For client with phone verification required', () 
       // Click continue/verify button
       signupPage.clickVerifyOTPButton();
       
+      // Click submit button on preferences page
+      signupPage.clickSubmitButtonOnPreferences();
+      
+      // Verify welcome message
+      cy.log('🔍 Checking for "Welcome, You are logged in" message');
+      cy.contains(/welcome.*logged in/i, {timeout: 10000}).should('be.visible');
+      cy.log('✅ Welcome message verified');
+      
       // Save user data to fixture
       signupPage.savePhoneVerifiedUserData(firstName, lastName, email, phoneNumber, selectedNationality, password);
-      
-      // Click Save button on the next page
-      signupPage.clickSaveButton();
       
       cy.wait(1000);
       

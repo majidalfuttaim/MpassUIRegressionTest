@@ -164,8 +164,10 @@ export class SignupPage{
     clickOnCountry() {
         cy.get('.text-left > :nth-child(4)').scrollIntoView().click({scrollBehavior:false, force: true});
         // Wait for the page re-render to complete and phone input to be stable
+        cy.wait(1000); // Wait for dropdown to close and page to start re-render
         cy.get('#phoneNumber').should('be.visible').should('not.be.disabled');
-        cy.wait(500); // Small wait for dropdown to close and page to stabilize
+        // Additional wait to ensure DOM is fully stable after re-render
+        cy.wait(500);
     }
 
     // Click on nationality dropdown - with dynamic selector detection
@@ -481,7 +483,7 @@ export class SignupPage{
         
         // Step 4: Click on register/sign-up link - find any button/link containing "Register" or "Sign up"
         cy.log('🔘 Clicking on Register label');
-        cy.contains('button, a', /(register|sign up|sign-up|signup)/i, { timeout: 15000 }).should('be.visible').click();
+        cy.contains('button, a', /(register|sign up|sign-up|signup)/i, { timeout: 15000 }).should('be.visible').click({force: true});
         cy.log('✅ Clicked register link');
         
         // Step 5: Wait for signup page to load
@@ -562,7 +564,7 @@ export class SignupPage{
                 
                 // Click on login button - wait for it to be visible instead of arbitrary wait
                 cy.log('🖱️ Clicking login button on landing page');
-                cy.get('#app > main > div > a', { timeout: 10000 }).should('be.visible').click({force: true});
+                cy.contains('button, a', /login/i, { timeout: 10000 }).should('be.visible').click({force: true});
                 // Removed 2000ms wait after click
                 
                 // Verify we're on login page
@@ -601,7 +603,7 @@ export class SignupPage{
         
         // Click login button - wait for visibility instead of arbitrary wait
         cy.log('🔘 Clicking Login button');
-        cy.get('#app > main > div > a', { timeout: 10000 }).should('be.visible').click({force: true});
+        cy.contains('button, a', /login/i, { timeout: 10000 }).should('be.visible').click({force: true});
         // Removed 2000ms wait after click
         
         cy.url().should('include', 'login');
@@ -616,8 +618,15 @@ export class SignupPage{
 
     // Wait for OTP page to load
     waitForOTPPage() {
-        // Removed 2000ms wait - check URL directly with timeout
-        cy.url().should('include', 'verify', { timeout: 10000 });
+        // Wait for OTP page - URL might include 'verify' or 'otp'
+        cy.url({ timeout: 15000 }).should('satisfy', (url: string) => {
+            const isOTPPage = url.includes('verify') || url.includes('otp') || url.includes('verification');
+            if (!isOTPPage) {
+                cy.log(`⚠️ Current URL: ${url}`);
+                cy.log('⚠️ Waiting for OTP/verification page...');
+            }
+            return isOTPPage;
+        });
         cy.log('✅ OTP verification page loaded');
     }
 
@@ -743,6 +752,77 @@ export class SignupPage{
         // Removed 1000ms wait - next command will auto-wait
     }
 
+    // Click submit button on preferences page after OTP verification
+    clickSubmitButtonOnPreferences() {
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('🔍 Looking for Submit button on preferences page');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        // Wait for preferences page to load
+        cy.wait(2000);
+        
+        // Log current URL and page content
+        cy.url().then((url) => {
+            cy.log(`📍 Current URL: ${url}`);
+        });
+        
+        cy.get('body').then(($body) => {
+            const pageText = $body.text().substring(0, 500);
+            cy.log(`📄 Page content: ${pageText}...`);
+        });
+        
+        // Try to find and click #submit-button with multiple strategies
+        cy.get('body').then(($body) => {
+            // Strategy 1: Try #submit-button
+            if ($body.find('#submit-button').length > 0) {
+                cy.log('✅ Found #submit-button');
+                cy.get('#submit-button').should('be.visible').scrollIntoView();
+                cy.wait(500);
+                cy.get('#submit-button').click({force: true, scrollBehavior: false});
+                cy.log('✅ Clicked #submit-button');
+                return;
+            }
+            
+            // Strategy 2: Try button with submit text
+            const submitButton = $body.find('button').filter((i, el) => {
+                const text = el.textContent?.toLowerCase() || '';
+                return text.includes('submit') || text.includes('save') || text.includes('continue');
+            });
+            
+            if (submitButton.length > 0) {
+                cy.log(`✅ Found button with text: ${submitButton.first().text()}`);
+                cy.wrap(submitButton.first()).scrollIntoView().click({force: true});
+                cy.log('✅ Clicked submit/save/continue button');
+                return;
+            }
+            
+            // Strategy 3: Try button[type="submit"]
+            if ($body.find('button[type="submit"]').length > 0) {
+                cy.log('✅ Found button[type="submit"]');
+                cy.get('button[type="submit"]').first().scrollIntoView().click({force: true});
+                cy.log('✅ Clicked button[type="submit"]');
+                return;
+            }
+            
+            // Strategy 4: Try any visible button
+            const visibleButtons = $body.find('button:visible');
+            if (visibleButtons.length > 0) {
+                cy.log(`⚠️ Clicking first visible button (found ${visibleButtons.length} buttons)`);
+                cy.wrap(visibleButtons.first()).click({force: true});
+                cy.log('✅ Clicked first visible button');
+                return;
+            }
+            
+            cy.log('⚠️ No submit button found - checking if already on welcome page');
+        });
+        
+        // Wait for redirection to welcome page
+        cy.wait(3000);
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('✅ Submit button interaction complete - checking for welcome page');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+
     // Click Save button on the next page
     clickSaveButton() {
         // Removed 2000ms wait - check for dropdowns immediately
@@ -829,16 +909,16 @@ export class SignupPage{
         cy.get('body').then(($body) => {
             if ($body.find('#email').length > 0 && $body.find('#email').is('input')) {
                 cy.log('✅ Using #email field');
-                cy.get('#email').clear().type(email);
+                cy.get('#email').clear({force: true}).type(email, {force: true});
             } else if ($body.find('#emailOrPhone input').length > 0) {
                 cy.log('✅ Using #emailOrPhone input field');
-                cy.get('#emailOrPhone input').clear().type(email);
+                cy.get('#emailOrPhone input').clear({force: true}).type(email, {force: true});
             } else if ($body.find('#emailOrPhone').length > 0 && $body.find('#emailOrPhone').is('input')) {
                 cy.log('✅ Using #emailOrPhone (is input)');
-                cy.get('#emailOrPhone').clear().type(email);
+                cy.get('#emailOrPhone').clear({force: true}).type(email, {force: true});
             } else {
                 cy.log('⚠️ Using fallback selector');
-                cy.get('input[type="email"], input[type="text"]').first().clear().type(email);
+                cy.get('input[type="email"], input[type="text"]').first().clear({force: true}).type(email, {force: true});
             }
         });
         // Removed 500ms wait - next command will auto-wait
@@ -848,7 +928,7 @@ export class SignupPage{
         cy.log(`✅ Email field value confirmed: ${email}`);
         
         // Enter password
-        cy.get('input[type="password"]').should('be.visible').clear().type(password);
+        cy.get('input[type="password"]').should('be.visible').clear({force: true}).type(password, {force: true});
         // Removed 500ms wait - next command will auto-wait
         
         // Verify password was entered correctly
@@ -888,12 +968,19 @@ export class SignupPage{
         nationality: string;
         password: string;
     }, clientName?: string) {
-        // First, verify the welcome message after login
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        cy.log('🔍 CHECKING FOR WELCOME MESSAGE AFTER LOGIN');
+        cy.log('📋 COMPLETING VERIFICATION AND SAVING USER DATA');
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
-        // Reduced wait from 3000ms to 1000ms - welcome message usually appears quickly
+        // STEP 1: Click submit button on preferences page (if present)
+        cy.log('🔍 Step 1: Checking for preferences page with submit button...');
+        this.clickSubmitButtonOnPreferences();
+        
+        // STEP 2: Verify the welcome message after clicking submit
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        cy.log('🔍 Step 2: CHECKING FOR WELCOME MESSAGE');
+        cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
         cy.wait(1000);
         
         // Look for "Welcome, You are logged in." message
@@ -933,11 +1020,9 @@ export class SignupPage{
             }
         });
         
-        // Removed 2000ms wait - proceed directly to saving data
-        
-        // Save user data BEFORE clicking save button
+        // STEP 3: Save user data to fixture file
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        cy.log('📝 SAVING USER DATA TO FIXTURE FILE NOW...');
+        cy.log('📝 Step 3: SAVING USER DATA TO FIXTURE FILE');
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
         cy.fixture(`usersStaging.json`).then((usersData: any) => {
@@ -970,45 +1055,6 @@ export class SignupPage{
                 cy.log(`✅✅✅ User data written to usersStaging.json as '${newUserKey}' ✅✅✅`);
                 cy.log(`✅ Data saved: ${JSON.stringify(newUser, null, 2)}`);
             });
-        });
-        
-        // Click Save button on the next page
-        cy.log('Clicking Save button');
-        this.clickSaveButton();
-        
-        // Reduced wait from 3000ms to 1000ms - save action usually completes quickly
-        cy.log('Save button clicked - waiting for welcome message...');
-        cy.wait(1000);
-        
-        // Check for welcome message or success indicator
-        cy.log('🔍 Checking for welcome message or success confirmation...');
-        cy.get('body').then(($body) => {
-            // Try to find and log welcome message
-            const welcomeSelectors = [
-                'h1, h2, h3',
-                '[class*="welcome"]',
-                '[class*="success"]',
-                '[class*="congratulation"]',
-                '.message',
-                '.success-message'
-            ];
-            
-            let welcomeMessageFound = false;
-            
-            for (const selector of welcomeSelectors) {
-                if ($body.find(selector).length > 0) {
-                    const messageText = $body.find(selector).first().text();
-                    if (messageText && messageText.trim()) {
-                        cy.log(`✨ Welcome Message Found: "${messageText}"`);
-                        welcomeMessageFound = true;
-                        break;
-                    }
-                }
-            }
-            
-            if (!welcomeMessageFound) {
-                cy.log('ℹ️ No specific welcome message found, but save action completed');
-            }
         });
         
         // Final success message
