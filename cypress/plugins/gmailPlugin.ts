@@ -220,6 +220,182 @@ export class GmailAPI {
   }
 
   /**
+   * Get password reset email for a specific email address
+   */
+  async getPasswordResetEmail(
+    emailAddress: string,
+    maxRetries: number = 10,
+    retryDelay: number = 3000
+  ): Promise<{ link: string; message: GmailMessage } | null> {
+    if (!this.gmail) {
+      await this.initialize();
+    }
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        console.log(`[Gmail] Attempt ${i + 1}/${maxRetries}: Checking inbox for password reset email to ${emailAddress}`);
+
+        // Search for password reset emails
+        const response = await this.gmail.users.messages.list({
+          userId: 'me',
+          q: `to:${emailAddress} subject:(reset OR forgot OR password) is:unread newer_than:5m`,
+          maxResults: 5,
+        });
+
+        if (response.data.messages && response.data.messages.length > 0) {
+          // Get the most recent message
+          const messageId = response.data.messages[0].id;
+          const message = await this.gmail.users.messages.get({
+            userId: 'me',
+            id: messageId,
+            format: 'full',
+          });
+
+          // Parse message
+          const parsedMessage = this.parseMessage(message.data);
+          
+          // Extract reset link
+          const resetLink = this.extractVerificationLink(parsedMessage.html || parsedMessage.body);
+
+          if (resetLink) {
+            console.log(`[Gmail] ✅ Found password reset link: ${resetLink}`);
+            
+            // Mark as read
+            await this.gmail.users.messages.modify({
+              userId: 'me',
+              id: messageId,
+              requestBody: {
+                removeLabelIds: ['UNREAD'],
+              },
+            });
+
+            return { link: resetLink, message: parsedMessage };
+          } else {
+            console.log('[Gmail] ⚠️ Password reset email found but no reset link detected');
+          }
+        } else {
+          console.log(`[Gmail] No new password reset emails found. Waiting ${retryDelay}ms...`);
+        }
+
+        // Wait before retrying
+        if (i < maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      } catch (error) {
+        console.error(`[Gmail] Error fetching password reset email:`, error);
+      }
+    }
+
+    console.log('[Gmail] ❌ No password reset email found after retries');
+    return null;
+  }
+
+  /**
+   * Get password reset verification code (6 digits) from email
+   */
+  async getPasswordResetCode(
+    emailAddress: string,
+    maxRetries: number = 10,
+    retryDelay: number = 3000
+  ): Promise<{ code: string; message: GmailMessage } | null> {
+    if (!this.gmail) {
+      await this.initialize();
+    }
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        console.log(`[Gmail] Attempt ${i + 1}/${maxRetries}: Checking inbox for password reset code to ${emailAddress}`);
+
+        // Search for password reset emails
+        const response = await this.gmail.users.messages.list({
+          userId: 'me',
+          q: `to:${emailAddress} subject:(reset OR forgot OR password OR code OR verification) is:unread newer_than:5m`,
+          maxResults: 5,
+        });
+
+        if (response.data.messages && response.data.messages.length > 0) {
+          // Get the most recent message
+          const messageId = response.data.messages[0].id;
+          const message = await this.gmail.users.messages.get({
+            userId: 'me',
+            id: messageId,
+            format: 'full',
+          });
+
+          const emailData = this.parseMessage(message.data);
+          
+          // Extract 6-digit code from email body
+          const code = this.extractVerificationCode(emailData);
+          
+          if (code) {
+            console.log(`[Gmail] ✅ Found verification code: ${code}`);
+            
+            // Mark email as read
+            await this.gmail.users.messages.modify({
+              userId: 'me',
+              id: messageId,
+              requestBody: {
+                removeLabelIds: ['UNREAD'],
+              },
+            });
+
+            console.log(`[Gmail] ✅ Code extracted successfully`);
+            return { code, message: emailData };
+          } else {
+            console.log(`[Gmail] ⚠️ Email found but no verification code detected`);
+          }
+        }
+
+        // Wait before retrying
+        if (i < maxRetries - 1) {
+          console.log(`[Gmail] Waiting ${retryDelay}ms before retry...`);
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      } catch (error) {
+        console.error(`[Gmail] Error in attempt ${i + 1}:`, error);
+      }
+    }
+
+    console.log(`[Gmail] ❌ No verification code found after ${maxRetries} attempts`);
+    return null;
+  }
+
+  /**
+   * Extract 6-digit verification code from email body
+   */
+  private extractVerificationCode(message: GmailMessage): string | null {
+    const bodyText = message.body + ' ' + message.html;
+    
+    // Try different patterns to find 6-digit code
+    const patterns = [
+      /\b(\d{6})\b/g,                                    // Simple 6 digits
+      /code[:\s]+(\d{6})/gi,                             // "code: 123456"
+      /verification[:\s]+(\d{6})/gi,                     // "verification: 123456"
+      /reset[:\s]+(\d{6})/gi,                            // "reset: 123456"
+      /your\s+code\s+is[:\s]+(\d{6})/gi,                // "your code is: 123456"
+      /enter[:\s]+(\d{6})/gi,                            // "enter: 123456"
+      /use[:\s]+(\d{6})/gi,                              // "use: 123456"
+    ];
+
+    for (const pattern of patterns) {
+      const matches = bodyText.match(pattern);
+      if (matches) {
+        for (const match of matches) {
+          // Extract just the 6 digits
+          const codeMatch = match.match(/\d{6}/);
+          if (codeMatch) {
+            const code = codeMatch[0];
+            console.log(`[Gmail] 🔍 Found potential code: ${code}`);
+            return code;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Delete all test emails (cleanup)
    */
   async cleanupTestEmails(emailAddress: string) {
@@ -250,6 +426,26 @@ export const gmailTasks = {
   async 'gmail:getVerificationEmail'(args: { email: string; maxRetries?: number; retryDelay?: number }) {
     const gmailAPI = new GmailAPI();
     const result = await gmailAPI.getVerificationEmail(
+      args.email,
+      args.maxRetries || 10,
+      args.retryDelay || 3000
+    );
+    return result;
+  },
+
+  async 'gmail:getPasswordResetEmail'(args: { email: string; maxRetries?: number; retryDelay?: number }) {
+    const gmailAPI = new GmailAPI();
+    const result = await gmailAPI.getPasswordResetEmail(
+      args.email,
+      args.maxRetries || 10,
+      args.retryDelay || 3000
+    );
+    return result;
+  },
+
+  async 'gmail:getPasswordResetCode'(args: { email: string; maxRetries?: number; retryDelay?: number }) {
+    const gmailAPI = new GmailAPI();
+    const result = await gmailAPI.getPasswordResetCode(
       args.email,
       args.maxRetries || 10,
       args.retryDelay || 3000

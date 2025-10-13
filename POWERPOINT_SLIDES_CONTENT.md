@@ -15,7 +15,7 @@ Copy each slide's content directly into PowerPoint. Format as needed.
 - Coverage: 22+ Client Applications
 - Achievement: 35% Performance Improvement
 
-**Footer:** [Your Name] | [Your Title] | October 2025
+**Footer:** [Bara issa] | [Sr.Qa engineer] | October 2025
 
 ---
 
