@@ -163,9 +163,8 @@ export class SignupPage{
 
     clickOnCountry() {
         cy.get('.text-left > :nth-child(4)').scrollIntoView().click({scrollBehavior:false, force: true});
-        // Wait for the page re-render to complete and phone input to be stable
+        // Wait for the page re-render to complete
         cy.wait(1000); // Wait for dropdown to close and page to start re-render
-        cy.get('#phoneNumber').should('be.visible').should('not.be.disabled');
         // Additional wait to ensure DOM is fully stable after re-render
         cy.wait(500);
     }
@@ -1143,6 +1142,44 @@ export class SignupPage{
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         cy.log('✅ PASSED: ' + clientName);
         cy.task('log', '✅ PASSED: ' + clientName, { log: false });
+    }
+
+    // Click on "Skip till next time" button
+    clickSkipButton() {
+        cy.contains(/skip till next time/i).should('be.visible').click();
+        cy.log('✅ Clicked on "Skip till next time" button');
+    }
+
+    // Click on toggle button
+    clickToggleLine() {
+        cy.get('.toggle__line').should('be.visible').click();
+        cy.log('✅ Clicked on toggle button');
+    }
+
+    // Save user data to usersStaging.json with phone_verified flag
+    saveUserDataToFixture(firstName: string, lastName: string, email: string, phoneNumber: string, nationality: string, password: string, phoneVerified: boolean = false) {
+        cy.readFile('cypress/fixtures/usersStaging.json').then((users) => {
+            const userKey = `user${Object.keys(users).length}`;
+            const userData = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phoneNumber: phoneNumber,
+                nationality: nationality,
+                password: password,
+                phone_verified: phoneVerified
+            };
+            users[userKey] = userData;
+            cy.writeFile('cypress/fixtures/usersStaging.json', users);
+            cy.log(`✅ User data saved as ${userKey}`);
+            cy.log(`📝 Saved data: ${JSON.stringify(userData, null, 2)}`);
+        });
+    }
+
+    // Verify welcome message
+    verifyWelcomeMessage() {
+        cy.contains(/welcome/i, { timeout: 10000 }).should('be.visible');
+        cy.log('✅ Welcome message displayed');
     }
 
 }

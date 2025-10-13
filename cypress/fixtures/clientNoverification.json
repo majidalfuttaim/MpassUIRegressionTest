@@ -1,0 +1,20 @@
+{
+  "clientDetails": [
+   {
+            "name": "MAFID-LEGO",
+            "clientId": "SAH2nwPAirTqDWwtFeGGm5WiR5ecmbnj",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+    },
+    {
+            "name": "MAFID-CRATE-BARREL",
+            "clientId": "KVyOXFA9YriOFbTQ9xwf76xWQJb72zHZ",
+            "passwordLessEmail": true,
+            "facebookLogin" : true,
+            "googleLogin" : true,
+            "phoneLogin" : false
+        }
+  ]
+}
