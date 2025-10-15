@@ -91,7 +91,7 @@ describe('Test Forget Password Feature with client IDs from fixture file', () =>
     });
   });
 
-  it.only('Check Forgot Password by verification code', function() {
+  it('Check Forgot Password by verification code', function() {
     const userKeys = Object.keys(usersStaging);
     const currentMinute = new Date().getMinutes();
     const randomUserOffset = currentMinute % userKeys.length;

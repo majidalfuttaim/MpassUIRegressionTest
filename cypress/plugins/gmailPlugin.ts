@@ -220,6 +220,64 @@ export class GmailAPI {
   }
 
   /**
+   * Extract password reset link from email content
+   * Looks for links near "Reset password" button or similar patterns
+   */
+  private extractPasswordResetLink(content: string): string | null {
+    // Patterns specifically for password reset links
+    const patterns = [
+      // Reset password button with href
+      /reset.*?password.*?href=["']([^"']+)["']/gi,
+      /href=["']([^"']+)["'].*?reset.*?password/gi,
+      // Any link with reset/password/forgot in URL
+      /href=["']([^"']*(?:reset|forgot|password|change)[^"']*)["']/gi,
+      // Direct URLs with reset keywords
+      /https?:\/\/[^\s<>"]+(?:reset|forgot|password|change)[^\s<>"]*/gi,
+      // Button with tracking/click links (common in email services)
+      /href=["']([^"']*(?:tracking|click)[^"']*)["']/gi,
+      // Any https URL from majidalfuttaim domain
+      /href=["'](https?:\/\/[^"']*majidalfuttaim[^"']*)["']/gi,
+      // Broader: any https link in the email
+      /href=["'](https?:\/\/[^"']+)["']/gi,
+    ];
+
+    for (const pattern of patterns) {
+      const matches = content.match(pattern);
+      if (matches && matches.length > 0) {
+        for (const match of matches) {
+          let link = match;
+          
+          // Extract URL from href attribute
+          const hrefMatch = link.match(/href=["']([^"']+)["']/i);
+          if (hrefMatch) {
+            link = hrefMatch[1];
+          }
+          
+          // Clean up the link
+          link = link.replace(/&amp;/g, '&');
+          link = link.replace(/&gt;/g, '');
+          link = link.replace(/&lt;/g, '');
+          link = link.replace(/=3D/g, '=');
+          link = link.trim();
+
+          // Validate it's a proper URL and not an unsubscribe or similar
+          if (link.startsWith('http') && 
+              !link.includes('unsubscribe') && 
+              !link.includes('privacy') &&
+              !link.includes('terms') &&
+              !link.includes('support')) {
+            console.log(`[Gmail] 🔗 Found potential reset link: ${link}`);
+            return link;
+          }
+        }
+      }
+    }
+
+    console.log('[Gmail] ⚠️ Could not extract password reset link from email');
+    return null;
+  }
+
+  /**
    * Get password reset email for a specific email address
    */
   async getPasswordResetEmail(
@@ -235,44 +293,51 @@ export class GmailAPI {
       try {
         console.log(`[Gmail] Attempt ${i + 1}/${maxRetries}: Checking inbox for password reset email to ${emailAddress}`);
 
-        // Search for password reset emails
+        // Search for password reset emails - removed is:unread to check all recent emails
         const response = await this.gmail.users.messages.list({
           userId: 'me',
-          q: `to:${emailAddress} subject:(reset OR forgot OR password) is:unread newer_than:5m`,
-          maxResults: 5,
+          q: `to:${emailAddress} (subject:(reset OR forgot OR password) OR from:noreply) newer_than:10m`,
+          maxResults: 10,
         });
 
         if (response.data.messages && response.data.messages.length > 0) {
-          // Get the most recent message
-          const messageId = response.data.messages[0].id;
-          const message = await this.gmail.users.messages.get({
-            userId: 'me',
-            id: messageId,
-            format: 'full',
-          });
-
-          // Parse message
-          const parsedMessage = this.parseMessage(message.data);
+          console.log(`[Gmail] Found ${response.data.messages.length} potential messages`);
           
-          // Extract reset link
-          const resetLink = this.extractVerificationLink(parsedMessage.html || parsedMessage.body);
-
-          if (resetLink) {
-            console.log(`[Gmail] ✅ Found password reset link: ${resetLink}`);
-            
-            // Mark as read
-            await this.gmail.users.messages.modify({
+          // Check each message to find one with a reset link
+          for (const msg of response.data.messages) {
+            const messageId = msg.id;
+            const message = await this.gmail.users.messages.get({
               userId: 'me',
               id: messageId,
-              requestBody: {
-                removeLabelIds: ['UNREAD'],
-              },
+              format: 'full',
             });
 
-            return { link: resetLink, message: parsedMessage };
-          } else {
-            console.log('[Gmail] ⚠️ Password reset email found but no reset link detected');
+            // Parse message
+            const parsedMessage = this.parseMessage(message.data);
+            console.log(`[Gmail] Checking message: "${parsedMessage.subject}"`);
+            
+            // Extract reset link using password reset specific patterns
+            const resetLink = this.extractPasswordResetLink(parsedMessage.html || parsedMessage.body);
+
+            if (resetLink) {
+              console.log(`[Gmail] ✅ Found password reset link: ${resetLink}`);
+              
+              // Mark as read
+              await this.gmail.users.messages.modify({
+                userId: 'me',
+                id: messageId,
+                requestBody: {
+                  removeLabelIds: ['UNREAD'],
+                },
+              });
+
+              return { link: resetLink, message: parsedMessage };
+            } else {
+              console.log(`[Gmail] ⚠️ No reset link found in this message, checking next...`);
+            }
           }
+          
+          console.log('[Gmail] ⚠️ No reset link found in any of the messages');
         } else {
           console.log(`[Gmail] No new password reset emails found. Waiting ${retryDelay}ms...`);
         }

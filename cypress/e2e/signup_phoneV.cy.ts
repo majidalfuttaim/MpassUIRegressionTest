@@ -40,6 +40,13 @@ describe('Test Sign up Feature For client with phone verification required', () 
       signupPage.addEmailInsideEmailField(email);
       signupPage.clickOnPhoneArrow();
       signupPage.clickOnCountry();
+      
+      // Wait for page re-render to complete after country selection
+      cy.wait(2000);
+      
+      // Ensure phone input field is visible and stable before typing
+      cy.get('#phoneNumber').should('be.visible').and('not.be.disabled');
+      
       signupPage.addPhoneInsideTheField(phoneNumber);
       
       // Add nationality and capture the selected value
@@ -68,6 +75,19 @@ describe('Test Sign up Feature For client with phone verification required', () 
       
       // Click submit button on preferences page
       signupPage.clickSubmitButtonOnPreferences();
+      
+      // After submit button interaction - a new page will appear
+      cy.log('✅ Submit button interaction complete - a new page will appear');
+      
+      // Click on toggle line
+      cy.wait(1000); // Wait for new page to load
+      signupPage.clickToggleLine();
+      
+      // Click save button
+      signupPage.clickSaveButton();
+      
+      // Wait for the new page to load after save
+      cy.wait(2000);
       
       // Verify welcome message
       cy.log('🔍 Checking for "Welcome, You are logged in" message');

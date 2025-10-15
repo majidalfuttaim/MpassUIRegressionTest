@@ -147,9 +147,16 @@ export class SignupPage{
     }
 
     addPhoneInsideTheField( phone : string) {
-        cy.get('#phoneNumber').type(phone, {scrollBehavior:false, force: true})
-        // Removed 2000ms wait - Cypress will auto-wait for next command
-        cy.log(`the phonenumber is : ${phone}`)
+        // Wait for phone field to be ready
+        cy.get('#phoneNumber').should('be.visible').and('not.be.disabled');
+        cy.wait(300);
+        
+        // Store reference to avoid re-querying
+        cy.get('#phoneNumber').as('phoneInput');
+        
+        // Type phone number
+        cy.get('@phoneInput').type(phone, {scrollBehavior:false, force: true});
+        cy.log(`the phonenumber is : ${phone}`);
     }
 
    createEmail(){
@@ -494,17 +501,23 @@ export class SignupPage{
 
     // Click submit button on signup form
     clickSignupSubmitButton() {
+        // Wait for page to stabilize after form filling
+        cy.wait(1000);
+        
         // Scroll to the submit button to ensure it's visible
         cy.get('#submit-button').scrollIntoView();
         cy.wait(500);
         
-        // Try clicking normally first, if covered, force click
-        cy.get('#submit-button').then(($btn) => {
-            if ($btn.is(':visible')) {
-                cy.get('#submit-button').click({force: true, scrollBehavior: false});
-                cy.log('✅ Clicked submit button');
-            }
-        });
+        // Store reference to button to avoid re-querying during page updates
+        cy.get('#submit-button').as('submitBtn');
+        
+        // Wait for button to be stable and not covered
+        cy.get('@submitBtn').should('be.visible');
+        cy.wait(300);
+        
+        // Click with force to avoid coverage issues
+        cy.get('@submitBtn').click({force: true, scrollBehavior: false});
+        cy.log('✅ Clicked submit button');
         cy.wait(1000);
     }
 
