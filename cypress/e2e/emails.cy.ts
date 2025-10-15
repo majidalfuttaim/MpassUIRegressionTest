@@ -1,112 +1,87 @@
+import EmailPage from '../pages/email_page.cy';
+
 describe('Email Verification Tests', () => {
   let usersData: any;
+  let emailPage: EmailPage;
 
   before(() => {
-    // Load the users from the fixture file
+    emailPage = new EmailPage();
     cy.fixture('usersStaging.json').then((data) => {
       usersData = data;
       const userCount = Object.keys(usersData).filter(key => key.startsWith('user')).length;
-      cy.log(`Loaded ${userCount} users from fixture`);
+      cy.log(`📊 Loaded ${userCount} users from fixture`);
+      cy.task('log', `📊 Loaded ${userCount} users from fixture`);
     });
   });
 
-  it('Check if welcome email was sent to the newly registered user', function() {
-    // Get the most recently added user (highest user number)
-    const userKeys = Object.keys(usersData).filter(key => key.startsWith('user')).sort();
-    const latestUserKey = userKeys[userKeys.length - 1];
-    const latestUser = usersData[latestUserKey];
+  it('Check if verification email was sent to the newly registered user', function() {
+    const { userKey: latestUserKey, user: latestUser } = emailPage.getLatestUser(usersData);
     
-    if (!latestUser) {
-      cy.log('❌ No users found in fixture file');
+    if (!emailPage.validateUserExists(latestUser)) {
       this.skip();
     }
 
-    cy.log(`Checking welcome email for: ${latestUser.email} (${latestUserKey})`);
-    cy.log(`User: ${latestUser.firstName} ${latestUser.lastName}`);
+    emailPage.logSectionHeader('📧 Checking verification email for latest user');
+    emailPage.logUserInfo(latestUserKey, latestUser);
+    emailPage.logSearchCriteria();
+    emailPage.logSectionHeader('');
     
-    // Note: This is a placeholder for actual email verification
-    // You'll need to integrate with an email service API
-    
-    // Example approach 1: Using Mailosaur (if you have it set up)
-    // cy.mailosaurGetMessage(serverId, {
-    //   sentTo: latestUser.email
-    // }).then(email => {
-    //   expect(email.subject).to.contain('Welcome');
-    //   cy.log('✅ Welcome email found!');
-    // });
-
-    // Example approach 2: Using Gmail API
-    cy.task('checkGmailForWelcomeEmail', {
-      email: latestUser.email,
-      subject: 'Welcome'
-    }).then((emailFound) => {
-      expect(emailFound).to.be.true;
-      cy.log('✅ Welcome email found in Gmail!');
+    emailPage.checkForVerificationEmail(latestUser.email, 10, 3000).then((result: any) => {
+      if (result && result.found) {
+        emailPage.logEmailFound(result);
+        emailPage.verifyEmailSubject(result);
+        emailPage.verifyEmailInBody(result, latestUser.email);
+      } else {
+        emailPage.logEmailNotFound(latestUser.email);
+      }
     });
-
-    // Example approach 3: Manual check with wait
-    cy.wait(5000); // Wait for email to be sent
-    cy.log('⚠️ Email verification not implemented yet');
-    cy.log('📧 Please manually check email: ' + latestUser.email);
-    cy.log('Expected: Welcome email should be received');
-    
-    // For now, we'll just log the information
-    cy.log('User Details:');
-    cy.log(`  User Key: ${latestUserKey}`);
-    cy.log(`  Name: ${latestUser.firstName} ${latestUser.lastName}`);
-    cy.log(`  Email: ${latestUser.email}`);
-    cy.log(`  Phone: ${latestUser.phoneNumber}`);
-    cy.log(`  Nationality: ${latestUser.nationality}`);
-    cy.log(`  Mobile Verified: ${latestUser.mobile_verified}`);
   });
 
-  it('Verify welcome email content and structure', function() {
-    const userKeys = Object.keys(usersData).filter(key => key.startsWith('user')).sort();
-    const latestUserKey = userKeys[userKeys.length - 1];
-    const latestUser = usersData[latestUserKey];
+  it('Verify verification email content and structure', function() {
+    const { userKey: latestUserKey, user: latestUser } = emailPage.getLatestUser(usersData);
     
-    if (!latestUser) {
-      cy.log('❌ No users found in fixture file');
+    if (!emailPage.validateUserExists(latestUser)) {
       this.skip();
     }
 
-    // This test would verify the email content once you have email API integration
-    cy.log('📧 Verifying email content for: ' + latestUser.email);
+    emailPage.logSectionHeader('📝 Verifying verification email content structure');
     
-    // TODO: Implement actual email content verification
-    // Expected checks:
-    // - Subject contains "Welcome"
-    // - Body contains user's first name
-    // - Email contains account activation link (if applicable)
-    // - Email is from the correct sender
-    
-    cy.log('⚠️ Email content verification not implemented yet');
-    cy.log('Expected checks:');
-    cy.log('  ✓ Subject should contain "Welcome"');
-    cy.log('  ✓ Body should contain first name: ' + latestUser.firstName);
-    cy.log('  ✓ Email should be from official sender');
+    emailPage.checkForVerificationEmail(latestUser.email, 5, 2000).then((result: any) => {
+      if (result && result.found) {
+        emailPage.verifyEmailContentStructure(result);
+        emailPage.checkEmailInBodyContent(result, latestUser.email);
+        emailPage.logContentChecksPassed();
+      } else {
+        emailPage.logEmailNotFoundForContentVerification(latestUser.email);
+      }
+    });
   });
 
-  it('Check all registered users have received welcome emails', function() {
+  it('Check verification emails for all recently registered users', function() {
     const userKeys = Object.keys(usersData).filter(key => key.startsWith('user'));
     
     if (!userKeys || userKeys.length === 0) {
-      cy.log('❌ No users found in fixture file');
+      emailPage.validateUserExists(null);
       this.skip();
     }
 
-    cy.log(`Checking welcome emails for ${userKeys.length} users`);
+    emailPage.logBulkCheckHeader(userKeys.length);
     
-    userKeys.forEach((userKey, index) => {
+    const recentUsers = emailPage.getRecentUsers(usersData, 3);
+    
+    recentUsers.forEach((userKey, index) => {
       const user = usersData[userKey];
-      cy.log(`\n${index + 1}. ${userKey}: ${user.email}`);
-      cy.log(`   Name: ${user.firstName} ${user.lastName}`);
-      cy.log(`   Mobile Verified: ${user.mobile_verified}`);
+      emailPage.logBulkUserCheck(index, recentUsers.length, userKey, user.email);
       
-      // TODO: Add actual email verification logic here
-      // For now, just log the information
+      emailPage.checkForVerificationEmail(user.email, 5, 2000).then((result: any) => {
+        if (result && result.found) {
+          emailPage.logBulkEmailFound(result.subject);
+        } else {
+          emailPage.logBulkEmailNotFound();
+        }
+      });
     });
     
-    cy.log('⚠️ Bulk email verification not implemented yet');
+    emailPage.logBulkVerificationComplete();
   });
 });

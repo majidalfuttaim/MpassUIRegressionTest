@@ -461,6 +461,96 @@ export class GmailAPI {
   }
 
   /**
+   * Check for welcome email
+   */
+  async checkForWelcomeEmail(
+    emailAddress: string,
+    maxRetries: number = 10,
+    retryDelay: number = 3000
+  ): Promise<{ found: boolean; message?: GmailMessage; subject?: string; body?: string } | null> {
+    if (!this.gmail) {
+      await this.initialize();
+    }
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        console.log(`[Gmail] Attempt ${i + 1}/${maxRetries}: Checking for verification email to ${emailAddress}`);
+
+        // Search specifically for "Please verify your email" subject
+        const response = await this.gmail.users.messages.list({
+          userId: 'me',
+          q: `to:${emailAddress} subject:"Please verify your email" newer_than:30m`,
+          maxResults: 10,
+        });
+
+        if (response.data.messages && response.data.messages.length > 0) {
+          console.log(`[Gmail] Found ${response.data.messages.length} potential messages`);
+          
+          // Check each message
+          for (const msg of response.data.messages) {
+            const messageId = msg.id;
+            const message = await this.gmail.users.messages.get({
+              userId: 'me',
+              id: messageId,
+              format: 'full',
+            });
+
+            // Parse message
+            const parsedMessage = this.parseMessage(message.data);
+            console.log(`[Gmail] Checking message: "${parsedMessage.subject}"`);
+            console.log(`[Gmail] From: ${parsedMessage.from}`);
+            
+            // Check if subject is "Please verify your email"
+            const isVerificationEmail = parsedMessage.subject.toLowerCase().includes('please verify your email');
+            
+            // Check if user's email appears in the email body
+            const bodyText = (parsedMessage.body || parsedMessage.html || '').toLowerCase();
+            const emailInBody = bodyText.includes(emailAddress.toLowerCase());
+            
+            console.log(`[Gmail] Subject matches "Please verify your email": ${isVerificationEmail}`);
+            console.log(`[Gmail] User email in body: ${emailInBody}`);
+            
+            if (isVerificationEmail && emailInBody) {
+              console.log(`[Gmail] ✅ Found verification email with user's email in body`);
+              console.log(`[Gmail] Subject: ${parsedMessage.subject}`);
+              console.log(`[Gmail] From: ${parsedMessage.from}`);
+              console.log(`[Gmail] Date: ${parsedMessage.date}`);
+              
+              return {
+                found: true,
+                message: parsedMessage,
+                subject: parsedMessage.subject,
+                body: parsedMessage.body || parsedMessage.html
+              };
+            } else {
+              if (!isVerificationEmail) {
+                console.log(`[Gmail] ⚠️ Subject doesn't match: "${parsedMessage.subject}"`);
+              }
+              if (!emailInBody) {
+                console.log(`[Gmail] ⚠️ User email not found in email body`);
+              }
+            }
+          }
+          
+          console.log('[Gmail] ⚠️ Messages found but none match welcome email criteria');
+        } else {
+          console.log(`[Gmail] No emails found with subject "Please verify your email". Waiting ${retryDelay}ms...`);
+        }
+
+        // Wait before retrying
+        if (i < maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      } catch (error) {
+        console.error(`[Gmail] Error checking for verification email:`, error);
+      }
+    }
+
+    console.log('[Gmail] ❌ No verification email with subject "Please verify your email" found after retries');
+    return { found: false };
+  }
+
+  /**
    * Delete all test emails (cleanup)
    */
   async cleanupTestEmails(emailAddress: string) {
@@ -522,5 +612,15 @@ export const gmailTasks = {
     const gmailAPI = new GmailAPI();
     await gmailAPI.cleanupTestEmails(args.email);
     return null;
+  },
+
+  async 'gmail:checkForWelcomeEmail'(args: { email: string; maxRetries?: number; retryDelay?: number }) {
+    const gmailAPI = new GmailAPI();
+    const result = await gmailAPI.checkForWelcomeEmail(
+      args.email,
+      args.maxRetries || 10,
+      args.retryDelay || 3000
+    );
+    return result;
   },
 };
