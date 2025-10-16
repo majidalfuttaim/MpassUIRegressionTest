@@ -1,0 +1,68 @@
+name: Cypress E2E Tests (Simple)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Gmail credentials
+        run: |
+          echo '${{ secrets.GMAIL_CREDENTIALS }}' > credentials.json
+          echo '${{ secrets.GMAIL_TOKEN }}' > token.json
+
+      - name: Create Cypress environment file
+        if: "${{ secrets.CYPRESS_ENV != '' }}"
+        run: |
+          echo '${{ secrets.CYPRESS_ENV }}' > cypress/cypress.env.json
+
+      - name: Run Cypress tests
+        run: |
+          npx cypress run --config-file cypress.config.dev.ts --browser chrome
+
+      - name: Generate Mochawesome Report
+        if: always()
+        run: |
+          npx mochawesome-merge cypress/reports/html/*.json > cypress/reports/mochawesome-combined.json || echo "No reports to merge"
+          npx mochawesome-report-generator cypress/reports/mochawesome-combined.json --reportDir cypress/reports/html --reportFilename index.html || echo "No reports to generate"
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports
+          path: |
+            cypress/reports/
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 30
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser**: Chrome" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node Version**: 24.9.0" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the uploaded artifacts for detailed reports, screenshots, and videos." >> $GITHUB_STEP_SUMMARY

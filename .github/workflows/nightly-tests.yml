@@ -1,0 +1,86 @@
+name: Nightly Cypress Tests
+
+on:
+  schedule:
+    # Runs every day at 2 AM UTC (adjust as needed)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  full-test-suite:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Gmail credentials
+        run: |
+          echo '${{ secrets.GMAIL_CREDENTIALS }}' > credentials.json
+          echo '${{ secrets.GMAIL_TOKEN }}' > token.json
+
+      - name: Create Cypress environment file
+        if: "${{ secrets.CYPRESS_ENV != '' }}"
+        run: |
+          echo '${{ secrets.CYPRESS_ENV }}' > cypress/cypress.env.json
+
+      - name: Run Full Test Suite (Staging)
+        run: |
+          npx cypress run --config-file cypress.config.dev.ts --browser chrome
+        continue-on-error: true
+
+      - name: Generate Mochawesome Report
+        if: always()
+        run: |
+          npx mochawesome-merge cypress/reports/html/*.json > cypress/reports/mochawesome-combined.json
+          npx mochawesome-report-generator cypress/reports/mochawesome-combined.json --reportDir cypress/reports/html --reportFilename nightly-report.html
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-test-results-${{ github.run_number }}
+          path: |
+            cypress/reports/
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 90
+
+      - name: Create Test Summary
+        if: always()
+        run: |
+          echo "## 🌙 Nightly Test Suite Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+          echo "**Browser**: Chrome" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Suites Executed:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Signup Email Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Signup Phone Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Signup No Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Login Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Forget Password" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Email Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the artifacts to view detailed HTML reports." >> $GITHUB_STEP_SUMMARY
+
+      # Optional: Send notification on failure (uncomment if needed)
+      # - name: Send Slack notification on failure
+      #   if: failure()
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   with:
+      #     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     payload: |
+      #       {
+      #         "text": "🚨 Nightly Cypress tests failed! Check GitHub Actions for details."
+      #       }

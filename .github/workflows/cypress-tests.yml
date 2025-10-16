@@ -1,0 +1,111 @@
+name: Cypress E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        # Run tests in parallel across multiple containers
+        containers: [1, 2, 3]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Gmail credentials
+        run: |
+          echo '${{ secrets.GMAIL_CREDENTIALS }}' > credentials.json
+          echo '${{ secrets.GMAIL_TOKEN }}' > token.json
+
+      - name: Create Cypress environment file
+        if: "${{ secrets.CYPRESS_ENV != '' }}"
+        run: |
+          echo '${{ secrets.CYPRESS_ENV }}' > cypress/cypress.env.json
+
+      - name: Run Cypress tests (Staging)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          record: false
+          parallel: true
+          group: 'E2E Tests - Staging'
+          config-file: cypress.config.dev.ts
+          spec: |
+            cypress/e2e/signup_emailV.cy.ts
+            cypress/e2e/signup_phoneV.cy.ts
+            cypress/e2e/signup_noV.cy.ts
+            cypress/e2e/login.cy.ts
+            cypress/e2e/forget_password.cy.ts
+            cypress/e2e/emails.cy.ts
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+      - name: Generate Mochawesome Report
+        if: always()
+        run: |
+          npx mochawesome-merge cypress/reports/html/*.json > cypress/reports/mochawesome-combined.json
+          npx mochawesome-report-generator cypress/reports/mochawesome-combined.json --reportDir cypress/reports/html --reportFilename index.html
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports-${{ matrix.containers }}
+          path: |
+            cypress/reports/
+            cypress/screenshots/
+            cypress/videos/
+          retention-days: 30
+
+      - name: Upload Test Screenshots (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ matrix.containers }}
+          path: cypress/screenshots/
+          retention-days: 7
+
+      - name: Upload Test Videos (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-${{ matrix.containers }}
+          path: cypress/videos/
+          retention-days: 7
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser**: Chrome" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Staging" >> $GITHUB_STEP_SUMMARY
+          echo "- **Container**: ${{ matrix.containers }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node Version**: 24.9.0" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Specs" >> $GITHUB_STEP_SUMMARY
+          echo "- Signup Email Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- Signup Phone Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- Signup No Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- Login Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Forget Password" >> $GITHUB_STEP_SUMMARY
+          echo "- Email Verification" >> $GITHUB_STEP_SUMMARY
