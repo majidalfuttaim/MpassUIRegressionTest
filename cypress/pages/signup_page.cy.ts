@@ -402,8 +402,8 @@ export class SignupPage{
             }
         });
         
-        // Wait for logout to complete
-        cy.wait(2000);
+        // Wait for logout to complete - reduced from 2000ms
+        cy.wait(1000);
         
         // Verify logout was successful by checking URL or page content
         cy.url().then((url) => {
@@ -476,7 +476,7 @@ export class SignupPage{
         const landingUrl = `https://mafid-sit.progressive.majidalfuttaim.com/landing/client/${cleanClientId}`;
         cy.log(`📍 Navigating to landing page: ${landingUrl}`);
         cy.visit(landingUrl);
-        cy.wait(2000);
+        cy.wait(1000); // Reduced from 2000ms
         
         // Step 2: Click on login page button - find any button/link containing "Login"
         cy.log('🔘 Clicking on Login button');
@@ -485,7 +485,7 @@ export class SignupPage{
         
         // Step 3: Wait for login page to fully load
         cy.log('⏳ Waiting for login page to load...');
-        cy.wait(3000);
+        cy.wait(2000); // Reduced from 3000ms
         
         // Step 4: Click on register/sign-up link - find any button/link containing "Register" or "Sign up"
         cy.log('🔘 Clicking on Register label');
@@ -494,7 +494,7 @@ export class SignupPage{
         
         // Step 5: Wait for signup page to load
         cy.log('✅ Waiting for signup page to load...');
-        cy.wait(2000);
+        cy.wait(1000); // Reduced from 2000ms
         cy.url().should('include', 'sign-up', { timeout: 10000 });
         cy.log('✅ Successfully navigated to signup page');
     }
@@ -502,31 +502,31 @@ export class SignupPage{
     // Click submit button on signup form
     clickSignupSubmitButton() {
         // Wait for page to stabilize after form filling
-        cy.wait(1000);
+        cy.wait(500); // Reduced from 1000ms
         
         // Scroll to the submit button to ensure it's visible
         cy.get('#submit-button').scrollIntoView();
-        cy.wait(500);
+        cy.wait(300); // Reduced from 500ms
         
         // Store reference to button to avoid re-querying during page updates
         cy.get('#submit-button').as('submitBtn');
         
         // Wait for button to be stable and not covered
         cy.get('@submitBtn').should('be.visible');
-        cy.wait(300);
+        cy.wait(200); // Reduced from 300ms
         
         // Click with force to avoid coverage issues
         cy.get('@submitBtn').click({force: true, scrollBehavior: false});
         cy.log('✅ Clicked submit button');
-        cy.wait(1000);
+        cy.wait(500); // Reduced from 1000ms
     }
 
     // Verify email by opening inbox and clicking verification link
     verifyEmailFromInbox(email: string, clientId: string) {
         cy.log('📧 Starting Gmail API email verification process');
         
-        // Reduced wait from 5000ms to 3000ms - email usually arrives quickly
-        cy.wait(3000);
+        // Wait for email to arrive - reduced from 3000ms to 2000ms
+        cy.wait(2000);
         cy.log(`📬 Fetching verification email from Gmail for: ${email}`);
         
         // Use Gmail API to get verification email
@@ -540,27 +540,31 @@ export class SignupPage{
                 cy.log(`📧 Subject: ${result.message.subject}`);
                 cy.log(`🔗 Verification link: ${result.link}`);
                 
-                // Visit the verification link
-                cy.log('🌐 Clicking verification link...');
-                cy.visit(result.link);
+                // Use cy.request to trigger verification link without rendering external page
+                // This prevents Chrome crash from external redirect
+                cy.log('🌐 Triggering verification link...');
+                cy.task('log', `[Verification] Requesting: ${result.link}`);
                 
-                // Reduced wait from 5000ms to 2000ms - verification usually completes quickly
-                cy.log('⏳ Waiting for email verification to complete...');
-                cy.wait(2000);
-                
-                // Check if verification was successful
-                cy.url().then(url => {
-                    cy.log(`✅ Email verification complete!`);
-                    cy.log(`📍 Current URL after verification: ${url}`);
+                cy.request({
+                    url: result.link,
+                    followRedirect: true,
+                    failOnStatusCode: false,
+                    timeout: 30000
+                }).then((response) => {
+                    cy.log(`✅ Verification request completed with status: ${response.status}`);
+                    cy.task('log', `[Verification] Response status: ${response.status}`);
                     
-                    if (url.includes('verified') || url.includes('success') || url.includes('confirm')) {
-                        cy.log('✅✅ Email verified successfully - confirmation page detected!');
-                    } else if (url.includes('login') || url.includes('sign-in')) {
-                        cy.log('✅✅ Email verified - already redirected to login page!');
+                    if (response.status >= 200 && response.status < 400) {
+                        cy.log('✅✅ Email verification triggered successfully!');
+                        cy.task('log', '[Verification] ✅ Email verified successfully');
                     } else {
-                        cy.log(`📍 Verification completed, current page: ${url}`);
+                        cy.log(`⚠️ Verification responded with status ${response.status}`);
+                        cy.task('log', `[Verification] ⚠️ Status: ${response.status}`);
                     }
                 });
+                
+                // Wait a bit for verification to process
+                cy.wait(2000);
                 
                 // Now navigate to login page after verification
                 cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -768,8 +772,8 @@ export class SignupPage{
         cy.log('🔍 Looking for Submit button on preferences page');
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
-        // Wait for preferences page to load
-        cy.wait(2000);
+        // Wait for preferences page to load - reduced from 2000ms
+        cy.wait(1000);
         
         // Log current URL and page content
         cy.url().then((url) => {
@@ -826,8 +830,8 @@ export class SignupPage{
             cy.log('⚠️ No submit button found - checking if already on welcome page');
         });
         
-        // Wait for redirection to welcome page
-        cy.wait(3000);
+        // Wait for redirection to welcome page - reduced from 3000ms
+        cy.wait(2000);
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         cy.log('✅ Submit button interaction complete - checking for welcome page');
         cy.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

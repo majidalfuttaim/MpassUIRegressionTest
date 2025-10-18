@@ -229,13 +229,15 @@ export class LoginPage{
     validateWelcomeMessage(clientName?: string){
         const currentClient = clientName || Cypress.env('currentClient') || 'Unknown Client';
         cy.log('🔍 Validating login success for client: ' + currentClient);
+        cy.task('log', '🔍 Validating login success for client: ' + currentClient, { log: false });
         
-        // Wait for page to settle after login
-        cy.wait(2000);
+        // Wait for page to settle after login - reduced from 2000ms to 1000ms
+        cy.wait(1000);
         
         // Check current URL and page state
         cy.url().then((url) => {
             cy.log(`📍 Current URL: ${url}`);
+            cy.task('log', `📍 Current URL: ${url}`, { log: false });
             
             // Check for various post-login pages
             cy.get('body').then(($body) => {
@@ -244,6 +246,7 @@ export class LoginPage{
                 // Check if on "Complete your profile" page
                 if (bodyText.includes('Complete your profile') || bodyText.includes('Update your profile')) {
                     cy.log('⚠️ Profile completion page detected - handling it');
+                    cy.task('log', '⚠️ Profile completion page detected - handling it', { log: false });
                     
                     // Click "Skip" or "Skip for now" or "Skip till next time" button if exists
                     cy.document().then((doc) => {
@@ -253,7 +256,7 @@ export class LoginPage{
                         
                         if (skipBtn) {
                             cy.wrap(skipBtn).click();
-                            cy.wait(1000);
+                            cy.wait(500); // Reduced from 1000ms
                             cy.log('✅ Skipped profile completion');
                         } else {
                             cy.log('⚠️ No skip button found, continuing');
@@ -264,6 +267,7 @@ export class LoginPage{
                 // Check if on "Update your Preferences" page
                 if (bodyText.includes('Update your Preferences') || bodyText.includes('preferences')) {
                     cy.log('⚠️ Preferences page detected - handling it');
+                    cy.task('log', '⚠️ Preferences page detected - handling it', { log: false });
                     
                     // Try to click save or skip
                     cy.document().then((doc) => {
@@ -274,29 +278,51 @@ export class LoginPage{
                         
                         if (skipBtn) {
                             cy.wrap(skipBtn).click();
-                            cy.wait(1000);
+                            cy.wait(500); // Reduced from 1000ms
                             cy.log('✅ Skipped preferences');
                         } else if (saveBtn) {
                             cy.wrap(saveBtn).click();
-                            cy.wait(1000);
+                            cy.wait(500); // Reduced from 1000ms
                             cy.log('✅ Saved preferences');
                         }
                     });
                 }
                 
                 // Now validate login was successful by checking for welcome message or other success indicators
-                cy.wait(1000);
+                cy.wait(500); // Reduced from 1000ms
                 cy.get('body').then(($finalBody) => {
                     const finalText = $finalBody.text();
                     
-                    if (finalText.match(/welcome|you are logged in|logged in|home|dashboard|profile/i)) {
+                    // **CRITICAL FIX**: Add proper assertions instead of just logging
+                    const hasSuccessIndicator = finalText.match(/welcome|you are logged in|logged in|home|dashboard|profile/i);
+                    const notOnLoginPage = !finalText.includes('Sign in') && 
+                                          !finalText.includes('Login') && 
+                                          !finalText.includes('Enter your email') && 
+                                          !finalText.includes('Password');
+                    const hasErrorMessage = finalText.includes('Wrong email or password') || 
+                                           finalText.includes('Invalid credentials') ||
+                                           finalText.includes('Authentication failed');
+                    
+                    if (hasErrorMessage) {
+                        cy.log('❌ Login FAILED - Error message detected for: ' + currentClient);
+                        cy.task('log', '❌ Login FAILED - Error message detected for: ' + currentClient, { log: false });
+                        throw new Error(`Login failed for ${currentClient}: Error message detected on page`);
+                    } else if (hasSuccessIndicator) {
                         cy.log('✅ Login successful - found success indicator for: ' + currentClient);
-                    } else if (!finalText.includes('Sign in') && !finalText.includes('Login') && 
-                               !finalText.includes('Enter your email') && !finalText.includes('Password')) {
+                        cy.task('log', '✅ Login successful - found success indicator for: ' + currentClient, { log: false });
+                        // Assert that we found success indicator
+                        expect(hasSuccessIndicator, `Login success indicator found for ${currentClient}`).to.not.be.null;
+                    } else if (notOnLoginPage) {
                         // Not on login page anymore, consider it successful
                         cy.log('✅ Login successful - no longer on login page for: ' + currentClient);
+                        cy.task('log', '✅ Login successful - no longer on login page for: ' + currentClient, { log: false });
+                        // Assert that we're not on login page
+                        expect(notOnLoginPage, `Should not be on login page for ${currentClient}`).to.be.true;
                     } else {
-                        cy.log('⚠️ Uncertain login state - may need manual verification for: ' + currentClient);
+                        // **CRITICAL**: Fail the test if we can't confirm login success
+                        cy.log('❌ Login FAILED - Cannot confirm successful login for: ' + currentClient);
+                        cy.task('log', '❌ Login FAILED - Cannot confirm successful login for: ' + currentClient, { log: false });
+                        throw new Error(`Login validation failed for ${currentClient}: Cannot confirm successful login. Still appears to be on login page.`);
                     }
                 });
             });
@@ -417,6 +443,97 @@ export class LoginPage{
                 cy.log('✅ Submit button exists');
             } else {
                 cy.log('⚠️ Submit button not found - skipping check');
+            }
+        });
+    }
+
+    /**
+     * Check if phone login is allowed by examining the email input field placeholder
+     * Returns true if phone/username is allowed, false if only email
+     */
+    checkIfPhoneLoginAllowed(clientName?: string): Cypress.Chainable<boolean> {
+        const currentClient = clientName || Cypress.env('currentClient') || 'Unknown Client';
+        
+        return cy.document().then((doc) => {
+            const emailInput = doc.querySelector('#email');
+            const emailOrPhoneInput = doc.querySelector('#emailOrPhone');
+            const usernameInput = doc.querySelector('#username');
+            
+            let placeholder = '';
+            let inputType = '';
+            
+            if (emailInput && emailInput instanceof HTMLInputElement) {
+                placeholder = emailInput.placeholder || '';
+                inputType = emailInput.type || 'text';
+            } else if (emailOrPhoneInput) {
+                if (emailOrPhoneInput instanceof HTMLInputElement) {
+                    placeholder = emailOrPhoneInput.placeholder || '';
+                    inputType = emailOrPhoneInput.type || 'text';
+                } else {
+                    const inputElement = emailOrPhoneInput.querySelector('input');
+                    placeholder = inputElement?.getAttribute('placeholder') || '';
+                    inputType = inputElement?.type || 'text';
+                }
+            } else if (usernameInput && usernameInput instanceof HTMLInputElement) {
+                placeholder = usernameInput.placeholder || '';
+                inputType = usernameInput.type || 'text';
+            } else {
+                // Fallback: find any input field
+                const anyInput = doc.querySelector('input[type="text"], input[type="email"], input[type="tel"]') as HTMLInputElement;
+                placeholder = anyInput?.placeholder || '';
+                inputType = anyInput?.type || 'text';
+            }
+            
+            const placeholderLower = placeholder.toLowerCase().trim();
+            cy.log(`📋 Input placeholder: "${placeholder}" (type: ${inputType})`);
+            cy.task('log', `📋 Input placeholder for ${currentClient}: "${placeholder}" (type: ${inputType})`, { log: false });
+            
+            // Check if placeholder mentions phone/mobile/username (indicates phone login is allowed)
+            const allowsPhone = placeholderLower.includes('phone') || 
+                               placeholderLower.includes('mobile') || 
+                               placeholderLower.includes('username') ||
+                               placeholderLower.includes('email or phone') ||
+                               placeholderLower.includes('email/phone') ||
+                               placeholderLower.includes('email or mobile') ||
+                               placeholderLower.includes('number');
+            
+            // More comprehensive email-only detection
+            const onlyEmail = (placeholderLower === 'email' || 
+                              placeholderLower === 'email address' ||
+                              placeholderLower === 'enter your email' ||
+                              placeholderLower === 'enter email' ||
+                              placeholderLower === 'your email' ||
+                              placeholderLower === 'e-mail' ||
+                              placeholderLower === 'enter your email address' ||
+                              inputType === 'email') && !allowsPhone;
+            
+            if (onlyEmail) {
+                cy.log(`⏭️ SKIPPING "${currentClient}": Login by phone number is NOT allowed (email-only field detected)`);
+                cy.task('log', `⏭️ SKIPPING "${currentClient}": Login by phone number is NOT allowed (email-only field detected)`, { log: false });
+                cy.log(`   Reason: Placeholder="${placeholder}", Type="${inputType}"`);
+                return cy.wrap(false);
+            } else if (allowsPhone) {
+                cy.log(`✅ Phone login IS allowed for client: ${currentClient}`);
+                cy.task('log', `✅ Phone login IS allowed for client: ${currentClient}`, { log: false });
+                return cy.wrap(true);
+            } else {
+                // Uncertain case - check input type and placeholder more carefully
+                if (inputType === 'email') {
+                    // Input type is email, likely email-only
+                    cy.log(`⏭️ SKIPPING "${currentClient}": Input type is 'email' - likely email-only field`);
+                    cy.task('log', `⏭️ SKIPPING "${currentClient}": Input type is 'email' - likely email-only field`, { log: false });
+                    return cy.wrap(false);
+                } else if (inputType === 'tel') {
+                    // Input type is tel, likely allows phone
+                    cy.log(`✅ Phone login IS allowed (input type is 'tel'): ${currentClient}`);
+                    cy.task('log', `✅ Phone login IS allowed (input type is 'tel'): ${currentClient}`, { log: false });
+                    return cy.wrap(true);
+                } else {
+                    // Still uncertain - default to NOT allowing phone to avoid false login attempts
+                    cy.log(`⚠️ Cannot determine definitively - defaulting to SKIP for safety: ${currentClient}`);
+                    cy.task('log', `⚠️ Cannot determine definitively - defaulting to SKIP for safety: ${currentClient}`, { log: false });
+                    return cy.wrap(false);
+                }
             }
         });
     }

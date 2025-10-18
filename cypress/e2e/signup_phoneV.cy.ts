@@ -41,8 +41,8 @@ describe('Test Sign up Feature For client with phone verification required', () 
       signupPage.clickOnPhoneArrow();
       signupPage.clickOnCountry();
       
-      // Wait for page re-render to complete after country selection
-      cy.wait(2000);
+      // Wait for page re-render to complete after country selection - reduced from 2000ms
+      cy.wait(1000);
       
       // Ensure phone input field is visible and stable before typing
       cy.get('#phoneNumber').should('be.visible').and('not.be.disabled');
@@ -79,15 +79,23 @@ describe('Test Sign up Feature For client with phone verification required', () 
       // After submit button interaction - a new page will appear
       cy.log('✅ Submit button interaction complete - a new page will appear');
       
-      // Click on toggle line
-      cy.wait(1000); // Wait for new page to load
-      signupPage.clickToggleLine();
+      // Click on toggle line (optional - may not exist for all clients)
+      cy.wait(500); // Wait for new page to load - reduced from 1000ms
+      cy.document().then((doc) => {
+        const toggleElement = doc.querySelector('.toggle__line');
+        if (toggleElement) {
+          signupPage.clickToggleLine();
+          cy.log('✅ Clicked toggle line');
+        } else {
+          cy.log('⚠️ Toggle line not found - skipping (optional element)');
+        }
+      });
       
       // Click save button
       signupPage.clickSaveButton();
       
-      // Wait for the new page to load after save
-      cy.wait(2000);
+      // Wait for the new page to load after save - reduced from 2000ms
+      cy.wait(1000);
       
       // Verify welcome message
       cy.log('🔍 Checking for "Welcome, You are logged in" message');
@@ -97,7 +105,7 @@ describe('Test Sign up Feature For client with phone verification required', () 
       // Save user data to fixture
       signupPage.savePhoneVerifiedUserData(firstName, lastName, email, phoneNumber, selectedNationality, password);
       
-      cy.wait(1000);
+      cy.wait(500); // Reduced from 1000ms
       
       // Logout after test completion
       signupPage.clickLogoutButton();

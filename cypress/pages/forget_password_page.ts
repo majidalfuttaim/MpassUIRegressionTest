@@ -276,8 +276,8 @@ export class ForgetPasswordPage {
     validateForgotPasswordPageLoaded() {
         cy.log('🔍 Validating forgot password page loaded...');
         
-        // Wait for page to load
-        cy.wait(2000);
+        // Wait for page to load - reduced from 2000ms
+        cy.wait(1000);
         
         cy.document().then((doc) => {
             // Check for email input field as primary indicator
@@ -308,11 +308,11 @@ export class ForgetPasswordPage {
 
     // Verify reset email from inbox using Gmail API
     verifyResetEmailFromInbox(email: string, clientId: string) {
-        cy.log('📧 Verifying reset password email from inbox (Gmail API will auto-click reset link)');
+        cy.log('📧 Verifying reset password email from inbox (using cy.request for faster processing)');
         cy.task('log', `[Gmail] Fetching reset password email for: ${email}`, { log: false });
         
-        // Wait for email to arrive
-        cy.wait(3000);
+        // Wait for email to arrive - reduced from 3000ms
+        cy.wait(2000);
         
         // Call Gmail API task to get password reset email and click the link
         cy.task('gmail:getPasswordResetEmail', {
@@ -325,10 +325,18 @@ export class ForgetPasswordPage {
                 cy.log(`📧 Subject: ${result.message.subject}`);
                 cy.task('log', `[Gmail] ✅ Reset link found: ${result.link}`, { log: false });
                 
-                // Visit the reset link - allow 401/403 as it might redirect properly
-                cy.visit(result.link, { timeout: 120000, failOnStatusCode: false });
-                cy.log('✅ Navigated to reset password page via email link');
-                cy.wait(2000);
+                // Use cy.request instead of cy.visit to trigger reset link without rendering external page
+                cy.request({
+                    url: result.link,
+                    followRedirect: true,
+                    failOnStatusCode: false,
+                    timeout: 30000
+                }).then((response) => {
+                    cy.log(`✅ Reset link triggered (Status: ${response.status})`);
+                    cy.task('log', `[Gmail] ✅ Reset link triggered with status: ${response.status}`, { log: false });
+                });
+                
+                cy.wait(1000); // Reduced from 2000ms
             } else {
                 cy.log('❌ No reset email found in inbox');
                 throw new Error('Reset password email not found');
@@ -341,7 +349,7 @@ export class ForgetPasswordPage {
         cy.log('📧 Getting verification code from inbox (Gmail API)');
         cy.task('log', `[Gmail] Fetching reset password code for: ${email}`, { log: false });
         
-        cy.wait(3000); // Wait for email to arrive
+        cy.wait(2000); // Wait for email to arrive - reduced from 3000ms
         
         return cy.task('gmail:getPasswordResetCode', {
             email: email,
@@ -526,7 +534,7 @@ export class ForgetPasswordPage {
 
     // Validate password reset success
     validatePasswordResetSuccess() {
-        cy.wait(2000); // Wait for any success message or redirect
+        cy.wait(1000); // Wait for any success message or redirect - reduced from 2000ms
         
         cy.document().then((doc) => {
             const successElement = doc.querySelector('.success-message') ||

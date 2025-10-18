@@ -22,7 +22,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-MOE",
@@ -37,7 +37,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-THAT",
@@ -45,7 +45,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-THAT-Mobile",
@@ -53,7 +53,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-VOX-MOBILE",
@@ -69,7 +69,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-ALLSAINTS",
@@ -77,7 +77,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-CB2",
@@ -85,7 +85,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-MOE-AUTH",
@@ -160,7 +160,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-PSYCHOBUNNY",
@@ -168,7 +168,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin" : true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         },
         {
             "name": "MAFID-ACTIVATE",
@@ -176,7 +176,7 @@
             "passwordLessEmail": true,
             "facebookLogin" : true,
             "googleLogin": true,
-            "phoneLogin" : false
+            "phoneLogin" : true
         }
     ] ,
     "userDetails":[     

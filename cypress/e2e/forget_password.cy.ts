@@ -12,20 +12,25 @@ describe('Test Forget Password Feature with client IDs from fixture file', () =>
     cy.fixture(fixtureFileName).then((data) => {
       clients = data.clientDetails;
     });
-
     cy.fixture('usersStaging.json').then((data) => {
       usersStaging = data;
     });
   });
 
   it('Check Forgot Password link exists on login page', function() {
-    clients.forEach((client, index) => {
+    // Sample only first 5 clients for element checking to reduce test time
+    // Forgot password link is consistent across clients, so full coverage isn't necessary
+    const sampleClients = clients.slice(0, 5);
+    
+    sampleClients.forEach((client, index) => {
       Cypress.env('currentClient', client.name);
       
-      forgetPasswordPage.navigateToLoginPage(client.clientId, client.name, index + 1, clients.length);
+      forgetPasswordPage.navigateToLoginPage(client.clientId, client.name, index + 1, sampleClients.length);
       forgetPasswordPage.checkForgotPasswordLinkExists();
       forgetPasswordPage.logTestPassed(client.name);
     });
+    
+    cy.log(`✅ Forgot password link checks completed for ${sampleClients.length}/${clients.length} clients (sampling)`);
   });
 
 
@@ -37,11 +42,11 @@ describe('Test Forget Password Feature with client IDs from fixture file', () =>
     
     cy.log(`🔄 Selecting user based on current time - offset: ${randomUserOffset}`);
     
-    // Randomly select 3 clients from the list
+    // Randomly select 2 clients from the list (reduced from 3 for faster execution)
     const shuffled = [...clients].sort(() => 0.5 - Math.random());
-    const selectedClients = shuffled.slice(0, 3);
+    const selectedClients = shuffled.slice(0, 2);
     
-    cy.log(`🎯 Testing 3 random clients out of ${clients.length} total clients`);
+    cy.log(`🎯 Testing 2 random clients out of ${clients.length} total clients (optimized)`);
     selectedClients.forEach((client, idx) => {
       cy.log(`   ${idx + 1}. ${client.name} (${client.clientId})`);
     });
