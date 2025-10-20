@@ -38,7 +38,7 @@ jobs:
           echo '${{ secrets.GMAIL_TOKEN }}' > token.json
 
       - name: Create Cypress environment file
-        if: "${{ secrets.CYPRESS_ENV != '' }}"
+        if: ${{ secrets.CYPRESS_ENV != '' }}
         run: |
           echo '${{ secrets.CYPRESS_ENV }}' > cypress/cypress.env.json
 
