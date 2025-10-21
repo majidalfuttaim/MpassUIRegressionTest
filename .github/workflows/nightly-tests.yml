@@ -32,6 +32,10 @@ jobs:
         run: |
           echo '${{ secrets.CYPRESS_ENV }}' > cypress/cypress.env.json || echo '{}' > cypress/cypress.env.json
 
+      - name: Create usersStaging.json from template
+        run: |
+          cp cypress/fixtures/usersStaging.json.template cypress/fixtures/usersStaging.json
+
       - name: Run Full Test Suite (Staging)
         run: |
           npx cypress run --config-file cypress.config.dev.ts --browser chrome
