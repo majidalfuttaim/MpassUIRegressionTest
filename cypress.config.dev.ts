@@ -1,4 +1,5 @@
 import { defineConfig } from "cypress";
+import { gmailTasks } from "./cypress/plugins/gmailPlugin";
 
 export default defineConfig({
   e2e: {
@@ -7,17 +8,36 @@ export default defineConfig({
     baseUrl: "https://mafid-sit.progressive.majidalfuttaim.com/landing/client/",
     "watchForFileChanges": false,
     "defaultCommandTimeout": 5000,
+    "pageLoadTimeout": 120000, // Increased to 120 seconds (2 minutes)
     "reporter": "mochawesome",
     "reporterOptions": {
         "charts": true,
         "overwrite": false,
-        "html": false,
+        "html": true,
         "json": true,
-        "reportDir": "cypress/reports"
+        "reportDir": "cypress/reports/html",
+        "reportFilename": "[status]_[datetime]-[name]-report",
+        "timestamp": "yyyy_mm_dd_HH_MM_ss",
+        "embeddedScreenshots": true,
+        "inlineAssets": true
        },
        
        "env": {
         "ENV": "Staging"
+      },
+      
+      setupNodeEvents(on, config) {
+        // Gmail API tasks
+        on('task', {
+          ...gmailTasks,
+          // Console log task for terminal output
+          log(message) {
+            console.log(message);
+            return null;
+          },
+        });
+
+        return config;
       }
     }
 });   
