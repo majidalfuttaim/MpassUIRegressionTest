@@ -1,0 +1,111 @@
+name: Cypress E2E Tests (Self-Hosted with VPN)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  cypress-run:
+    runs-on: self-hosted  # Changed from ubuntu-latest to use self-hosted runner with VPN access
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        # Run tests in parallel across multiple containers
+        containers: [1, 2, 3]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.9.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Gmail credentials
+        run: |
+          echo '${{ secrets.GMAIL_CREDENTIALS }}' > credentials.json
+          echo '${{ secrets.GMAIL_TOKEN }}' > token.json
+
+      - name: Create Cypress environment file (optional)
+        run: |
+          echo '${{ secrets.CYPRESS_ENV }}' > cypress/cypress.env.json || echo '{}' > cypress/cypress.env.json
+
+      - name: Create usersStaging.json from template
+        run: |
+          cp cypress/fixtures/usersStaging.json.template cypress/fixtures/usersStaging.json
+
+      - name: Verify VPN connectivity
+        run: |
+          echo "Testing connection to staging environment..."
+          curl -I https://mafid-sit.progressive.majidalfuttaim.com || echo "⚠️ Warning: Cannot reach staging environment. Ensure VPN is connected!"
+
+      - name: Run Cypress tests (Staging)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          record: false
+          parallel: true
+          group: 'E2E Tests - Staging'
+          config-file: cypress.config.dev.ts
+          spec: |
+            cypress/e2e/signup_emailV.cy.ts
+            cypress/e2e/signup_phoneV.cy.ts
+            cypress/e2e/signup_noV.cy.ts
+            cypress/e2e/login.cy.ts
+            cypress/e2e/forget_password.cy.ts
+            cypress/e2e/emails.cy.ts
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+      - name: Upload test screenshots (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ matrix.containers }}
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload test videos (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-${{ matrix.containers }}
+          path: cypress/videos
+          retention-days: 7
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports-${{ matrix.containers }}
+          path: cypress/reports/html
+          retention-days: 30
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Staging (VPN Required)" >> $GITHUB_STEP_SUMMARY
+          echo "**Browser:** Chrome" >> $GITHUB_STEP_SUMMARY
+          echo "**Runner:** Self-Hosted" >> $GITHUB_STEP_SUMMARY
+          echo "**Container:** ${{ matrix.containers }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Config:** cypress.config.dev.ts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Specs:**" >> $GITHUB_STEP_SUMMARY
+          echo "- signup_emailV.cy.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- signup_phoneV.cy.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- signup_noV.cy.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- login.cy.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- forget_password.cy.ts" >> $GITHUB_STEP_SUMMARY
+          echo "- emails.cy.ts" >> $GITHUB_STEP_SUMMARY
