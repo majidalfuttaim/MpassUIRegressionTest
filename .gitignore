@@ -21,6 +21,11 @@ credentials.json
 token.json
 
 # ============================================
+# VPN Configuration - SENSITIVE - DO NOT COMMIT
+# ============================================
+.github/VPN_CONFIGURATION.md
+
+# ============================================
 # Test Generated Data - DO NOT COMMIT
 # ============================================
 cypress/fixtures/usersStaging.json
